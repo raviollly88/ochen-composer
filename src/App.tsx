@@ -8,7 +8,7 @@ import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { CanvasView } from './components/CanvasView';
 import { PaletteModal } from './components/PaletteModal';
-import { generateCompositionFromPrompt, generateCompositionFromComponents } from './aiComposer';
+import { generateCompositionFromPrompt, generateCompositionFromComponents, fitAndCenterScene } from './aiComposer';
 import { buildStandaloneSVG, downloadSVG } from './svgExporter';
 
 export function App() {
@@ -48,6 +48,13 @@ export function App() {
     );
   };
 
+  const handleFormatChange = (newFormat: CanvasFormat) => {
+    setFormat(newFormat);
+    if (items.length > 0) {
+      setItems(prev => fitAndCenterScene(prev, newFormat, 50));
+    }
+  };
+
   const handleAddItem = (objectType: string, state: ObjectState) => {
     const cfg = FORMATS[format];
     const maxZ = items.length > 0 ? Math.max(...items.map(i => i.zIndex)) : 0;
@@ -61,7 +68,7 @@ export function App() {
       state,
       x: Math.round(cfg.width / 2 + offset),
       y: Math.round(cfg.height / 2 + offset),
-      scale: 0.32,
+      scale: 0.85,
       rotation: 0,
       zIndex: maxZ + 5,
     };
@@ -146,7 +153,7 @@ export function App() {
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-zinc-950 font-sans">
       <Header
         format={format}
-        onFormatChange={setFormat}
+        onFormatChange={handleFormatChange}
         detailSize={detailSize}
         onDetailSizeChange={handleDetailSizeChange}
         palettes={palettes}

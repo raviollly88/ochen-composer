@@ -12,10 +12,10 @@ export interface FormatConfig {
 }
 
 export const FORMATS: Record<CanvasFormat, FormatConfig> = {
-  '16:9': { id: '16:9', label: '16:9 Баннер', width: 960, height: 540, aspectRatio: '16/9' },
-  '1:1': { id: '1:1', label: '1:1 Квадрат', width: 720, height: 720, aspectRatio: '1/1' },
-  '9:16': { id: '9:16', label: '9:16 Вертикальный', width: 540, height: 960, aspectRatio: '9/16' },
-  '4:3': { id: '4:3', label: '4:3 Карточка', width: 800, height: 600, aspectRatio: '4/3' },
+  '16:9': { id: '16:9', label: '16:9 Баннер', width: 1200, height: 675, aspectRatio: '16/9' },
+  '1:1': { id: '1:1', label: '1:1 Квадрат', width: 1000, height: 1000, aspectRatio: '1/1' },
+  '9:16': { id: '9:16', label: '9:16 Вертикальный', width: 675, height: 1200, aspectRatio: '9/16' },
+  '4:3': { id: '4:3', label: '4:3 Карточка', width: 1000, height: 750, aspectRatio: '4/3' },
 };
 
 export interface SVGPath {

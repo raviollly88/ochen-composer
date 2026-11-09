@@ -33,12 +33,16 @@ export function buildStandaloneSVG(
   ];
 
   if (showDecor) {
+    const lineSpan = Math.min(360, W * 0.40);
+    const ellipseRx = Math.min(90, W * 0.12);
+    const ellipseRy = ellipseRx * 0.46;
+
     lines.push(`  <!-- Studio Ochen Background Decorative Scratches & Accents -->`);
     lines.push(`  <g id="background-decor">`);
-    lines.push(`    <line x1="${cx - 380}" y1="${cy + 80}" x2="${cx - 60}" y2="${cy - 105}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>`);
-    lines.push(`    <line x1="${cx - 260}" y1="${cy - 160}" x2="${cx - 150}" y2="${cy - 223}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>`);
-    lines.push(`    <line x1="${cx + 120}" y1="${cy + 170}" x2="${cx + 200}" y2="${cy + 124}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>`);
-    lines.push(`    <ellipse cx="${cx - 140}" cy="${cy - 40}" rx="90" ry="42" fill="${strokeColor}" opacity="0.12"/>`);
+    lines.push(`    <line x1="${cx - lineSpan}" y1="${cy + lineSpan * 0.22}" x2="${cx - lineSpan * 0.15}" y2="${cy - lineSpan * 0.28}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>`);
+    lines.push(`    <line x1="${cx - lineSpan * 0.70}" y1="${cy - lineSpan * 0.45}" x2="${cx - lineSpan * 0.40}" y2="${cy - lineSpan * 0.62}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>`);
+    lines.push(`    <line x1="${cx + lineSpan * 0.35}" y1="${cy + lineSpan * 0.45}" x2="${cx + lineSpan * 0.55}" y2="${cy + lineSpan * 0.33}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>`);
+    lines.push(`    <ellipse cx="${cx - 120}" cy="${cy - 50}" rx="${ellipseRx}" ry="${ellipseRy}" fill="${strokeColor}" opacity="0.12"/>`);
     lines.push(`    <!-- Signature Corner Pills -->`);
     lines.push(`    <g transform="translate(75, ${H - 65})">`);
     lines.push(`      <ellipse cx="20" cy="22" rx="28" ry="14" fill="${strokeColor}" opacity="0.65"/>`);

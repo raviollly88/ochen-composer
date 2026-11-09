@@ -26,15 +26,20 @@ export const BackgroundDecor: React.FC<BackgroundDecorProps> = ({
   const cy = H / 2;
   const strokeColor = palette.bgDark;
 
+  // Floor scratches adaptively scaled to fit canvas bounds
+  const lineSpan = Math.min(360, W * 0.40);
+  const ellipseRx = Math.min(90, W * 0.12);
+  const ellipseRy = ellipseRx * 0.46;
+
   // 30-degree isometric slope: dx = L * cos(30) ≈ L * 0.866, dy = L * sin(30) ≈ L * 0.500
   return (
     <g id="background-decor" pointerEvents="none" className="select-none">
       {/* 1. Main diagonal isometric scratch line across floor */}
       <line
-        x1={cx - 380}
-        y1={cy + 80}
-        x2={cx - 60}
-        y2={cy - 105}
+        x1={cx - lineSpan}
+        y1={cy + lineSpan * 0.22}
+        x2={cx - lineSpan * 0.15}
+        y2={cy - lineSpan * 0.28}
         stroke={strokeColor}
         strokeWidth="1.5"
         strokeLinecap="round"
@@ -43,10 +48,10 @@ export const BackgroundDecor: React.FC<BackgroundDecorProps> = ({
 
       {/* 2. Secondary parallel scratch mark near upper-left background */}
       <line
-        x1={cx - 260}
-        y1={cy - 160}
-        x2={cx - 150}
-        y2={cy - 223}
+        x1={cx - lineSpan * 0.70}
+        y1={cy - lineSpan * 0.45}
+        x2={cx - lineSpan * 0.40}
+        y2={cy - lineSpan * 0.62}
         stroke={strokeColor}
         strokeWidth="1.5"
         strokeLinecap="round"
@@ -55,10 +60,10 @@ export const BackgroundDecor: React.FC<BackgroundDecorProps> = ({
 
       {/* 3. Small floor hatch mark near foreground right */}
       <line
-        x1={cx + 120}
-        y1={cy + 170}
-        x2={cx + 200}
-        y2={cy + 124}
+        x1={cx + lineSpan * 0.35}
+        y1={cy + lineSpan * 0.45}
+        x2={cx + lineSpan * 0.55}
+        y2={cy + lineSpan * 0.33}
         stroke={strokeColor}
         strokeWidth="1.5"
         strokeLinecap="round"
@@ -67,10 +72,10 @@ export const BackgroundDecor: React.FC<BackgroundDecorProps> = ({
 
       {/* 4. Ground shadow ellipse under background depth */}
       <ellipse
-        cx={cx - 140}
-        cy={cy - 40}
-        rx={90}
-        ry={42}
+        cx={cx - 120}
+        cy={cy - 50}
+        rx={ellipseRx}
+        ry={ellipseRy}
         fill={strokeColor}
         opacity="0.12"
       />

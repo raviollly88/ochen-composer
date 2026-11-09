@@ -33,11 +33,43 @@ PALETTES = {
 }
 
 FORMATS = {
-    "16:9": {"width": 960, "height": 540},
-    "1:1": {"width": 720, "height": 720},
-    "9:16": {"width": 540, "height": 960},
-    "4:3": {"width": 800, "height": 600}
+    "16:9": {"width": 1200, "height": 675},
+    "1:1": {"width": 1000, "height": 1000},
+    "9:16": {"width": 675, "height": 1200},
+    "4:3": {"width": 1000, "height": 750}
 }
+
+def auto_fit_scene(items, W, H, margin=50):
+    min_x, min_y, max_x, max_y = 1e9, 1e9, -1e9, -1e9
+    for it in items:
+        asset_id = f"{it['objectType']}-{it['size']}-{it['state']}"
+        asset = asset_map[asset_id]
+        w = asset["w"] * it["scale"]
+        h = asset["h"] * it["scale"]
+        min_x = min(min_x, it["x"] - w / 2)
+        min_y = min(min_y, it["y"] - h / 2)
+        max_x = max(max_x, it["x"] + w / 2)
+        max_y = max(max_y, it["y"] + h / 2)
+
+    total_w = max_x - min_x
+    total_h = max_y - min_y
+    max_w = W - 2 * margin
+    max_h = H - 2 * margin
+
+    scale_factor = min(1.0, max_w / total_w if total_w > max_w else 1.0, max_h / total_h if total_h > max_h else 1.0)
+    comp_cx = (min_x + max_x) / 2
+    comp_cy = (min_y + max_y) / 2
+    target_cx = W / 2
+    target_cy = H / 2
+
+    fitted = []
+    for it in items:
+        new_scale = it["scale"] * scale_factor
+        new_x = target_cx + (it["x"] - comp_cx) * scale_factor
+        new_y = target_cy + (it["y"] - comp_cy) * scale_factor
+        fitted.append({**it, "x": new_x, "y": new_y, "scale": new_scale})
+
+    return fitted
 
 def adapt_color(fill, palette, is_monochrome):
     if not fill:
@@ -64,7 +96,12 @@ def build_svg(items, format_key, palette_key, show_decor=True):
     cy = H / 2
     stroke_color = pal["bgDark"]
 
-    sorted_items = sorted(items, key=lambda x: x.get("zIndex", 10))
+    fitted_items = auto_fit_scene(items, W, H, margin=50)
+    sorted_items = sorted(fitted_items, key=lambda x: x.get("zIndex", 10))
+
+    line_span = min(360, W * 0.40)
+    ellipse_rx = min(90, W * 0.12)
+    ellipse_ry = ellipse_rx * 0.46
 
     lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -81,10 +118,10 @@ def build_svg(items, format_key, palette_key, show_decor=True):
         lines.extend([
             '  <!-- Studio Ochen Background Decorative Scratches & Accents -->',
             '  <g id="background-decor">',
-            f'    <line x1="{cx - 380}" y1="{cy + 80}" x2="{cx - 60}" y2="{cy - 105}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>',
-            f'    <line x1="{cx - 260}" y1="{cy - 160}" x2="{cx - 150}" y2="{cy - 223}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>',
-            f'    <line x1="{cx + 120}" y1="{cy + 170}" x2="{cx + 200}" y2="{cy + 124}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>',
-            f'    <ellipse cx="{cx - 140}" cy="{cy - 40}" rx="90" ry="42" fill="{stroke_color}" opacity="0.12"/>',
+            f'    <line x1="{cx - line_span}" y1="{cy + line_span * 0.22}" x2="{cx - line_span * 0.15}" y2="{cy - line_span * 0.28}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>',
+            f'    <line x1="{cx - line_span * 0.70}" y1="{cy - line_span * 0.45}" x2="{cx - line_span * 0.40}" y2="{cy - line_span * 0.62}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>',
+            f'    <line x1="{cx + line_span * 0.35}" y1="{cy + line_span * 0.45}" x2="{cx + line_span * 0.55}" y2="{cy + line_span * 0.33}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>',
+            f'    <ellipse cx="{cx - 120}" cy="{cy - 50}" rx="{ellipse_rx}" ry="{ellipse_ry}" fill="{stroke_color}" opacity="0.12"/>',
             '    <!-- Signature Corner Pills -->',
             f'    <g transform="translate(75, {H - 65})">',
             f'      <ellipse cx="20" cy="22" rx="28" ry="14" fill="{stroke_color}" opacity="0.65"/>',
@@ -106,7 +143,7 @@ def build_svg(items, format_key, palette_key, show_decor=True):
         oy = asset["h"] / 2
 
         lines.append(f"    <!-- {item['objectType']} ({item['state']}) -->")
-        lines.append(f'    <g transform="translate({item["x"]}, {item["y"]}) rotate({item.get("rotation", 0)}) scale({item["scale"]}) translate(-{ox}, -{oy})">')
+        lines.append(f'    <g transform="translate({round(item["x"], 1)}, {round(item["y"], 1)}) rotate({item.get("rotation", 0)}) scale({round(item["scale"], 3)}) translate(-{ox}, -{oy})">')
 
         is_mono = item["state"] == "bg"
         for p in asset["paths"]:
@@ -125,28 +162,28 @@ def build_svg(items, format_key, palette_key, show_decor=True):
 
 
 # 1. Composition 1: 16:9 Banner - "Конспекты и лекции" (Purple Mist)
-# Authentic Studio Layout: Lamp in background, Open Notebook in center, Smartphone resting on right page, Pen in front
+# Studio Layout: Lamp (S bg) in background, Notebook (S main) in center, Phone (S main) resting on page, Pen in front
 sample1 = [
-    {"objectType": "lamp", "size": "L", "state": "bg", "x": 250, "y": 200, "scale": 0.30, "zIndex": 5},
-    {"objectType": "notebook", "size": "L", "state": "main", "x": 510, "y": 320, "scale": 0.36, "zIndex": 15},
-    {"objectType": "phone", "size": "L", "state": "main", "x": 640, "y": 270, "scale": 0.26, "zIndex": 25},
-    {"objectType": "pen", "size": "S", "state": "main", "x": 480, "y": 420, "scale": 0.38, "zIndex": 30}
+    {"objectType": "lamp", "size": "S", "state": "bg", "x": 340, "y": 270, "scale": 0.90, "zIndex": 5},
+    {"objectType": "notebook", "size": "S", "state": "main", "x": 680, "y": 410, "scale": 0.95, "zIndex": 15},
+    {"objectType": "phone", "size": "S", "state": "main", "x": 810, "y": 380, "scale": 0.85, "zIndex": 25},
+    {"objectType": "pen", "size": "S", "state": "main", "x": 640, "y": 550, "scale": 0.95, "zIndex": 30}
 ]
 
 # 2. Composition 2: 1:1 Square - "Личные финансы и бюджет" (Warm Peach)
-# Authentic Studio Layout: Folder in background, Wallet in foreground, Gold coin accent
+# Studio Layout: Folder (S bg) in background, Wallet (L main) in foreground, Gold coin (S main) in front
 sample2 = [
-    {"objectType": "folder", "size": "L", "state": "bg", "x": 270, "y": 290, "scale": 0.32, "zIndex": 5},
-    {"objectType": "wallet", "size": "L", "state": "main", "x": 390, "y": 410, "scale": 0.40, "zIndex": 20},
-    {"objectType": "coin", "size": "S", "state": "main", "x": 290, "y": 510, "scale": 0.42, "zIndex": 30}
+    {"objectType": "folder", "size": "S", "state": "bg", "x": 380, "y": 360, "scale": 0.95, "zIndex": 5},
+    {"objectType": "wallet", "size": "L", "state": "main", "x": 560, "y": 550, "scale": 0.95, "zIndex": 20},
+    {"objectType": "coin", "size": "S", "state": "main", "x": 440, "y": 700, "scale": 1.0, "zIndex": 30}
 ]
 
 # 3. Composition 3: 9:16 Stories - "Музыка и технологии" (Fresh Mint)
-# Authentic Studio Layout: Flowers/Vase in background, Headphones hero in center, Puzzle accent
+# Studio Layout: Flowers (S bg) in background depth, Headphones (L main) in center foreground, Puzzle (S main) at bottom
 sample3 = [
-    {"objectType": "flowers", "size": "L", "state": "bg", "x": 270, "y": 340, "scale": 0.32, "zIndex": 5},
-    {"objectType": "headphones", "size": "L", "state": "main", "x": 270, "y": 550, "scale": 0.42, "zIndex": 20},
-    {"objectType": "puzzle", "size": "L", "state": "main", "x": 240, "y": 710, "scale": 0.34, "zIndex": 25}
+    {"objectType": "flowers", "size": "S", "state": "bg", "x": 338, "y": 380, "scale": 0.90, "zIndex": 5},
+    {"objectType": "headphones", "size": "L", "state": "main", "x": 338, "y": 650, "scale": 0.85, "zIndex": 20},
+    {"objectType": "puzzle", "size": "S", "state": "main", "x": 300, "y": 860, "scale": 0.95, "zIndex": 25}
 ]
 
 tasks = [
