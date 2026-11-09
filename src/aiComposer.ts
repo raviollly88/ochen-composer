@@ -138,6 +138,29 @@ export function fitAndCenterScene(
 }
 
 /**
+ * Returns the canonical detail size (L or S) to guarantee real-world desk proportions.
+ * Prevents folders or notebooks from towering over desk lamps.
+ */
+function getCanonicalDetailSize(objectType: string, isHero: boolean, hasCompanion: boolean): DetailSize {
+  // Items that are wide/tall in L must use S in multi-object compositions to match studio proportions
+  if (objectType === 'folder') return 'S';
+  if (objectType === 'notebook') return 'S';
+  if (objectType === 'lamp') return 'S';
+  if (objectType === 'flowers') return 'S';
+  if (objectType === 'pen') return 'S';
+
+  if (objectType === 'phone') {
+    return isHero && !hasCompanion ? 'L' : (isHero ? 'L' : 'S');
+  }
+  if (objectType === 'wallet') return 'L';
+  if (objectType === 'headphones') return 'L';
+  if (objectType === 'coin') return 'L';
+  if (objectType === 'puzzle') return isHero ? 'L' : 'S';
+
+  return 'S';
+}
+
+/**
  * Dynamically analyzes ANY user prompt, extracts semantic keywords,
  * ranks all 10 objects, and produces a laconic 2-3 object composition.
  */
@@ -147,11 +170,6 @@ export function generateCompositionFromPrompt(
   _detailSize: DetailSize = 'L'
 ): AICompositionResult {
   const pLower = prompt.toLowerCase().trim();
-  const formatConfig = FORMATS[format];
-  const W = formatConfig.width;
-  const H = formatConfig.height;
-  const cx = Math.round(W / 2);
-  const cy = Math.round(H / 2);
 
   // 1. Semantic scoring across all 10 library objects
   const scores: Record<string, { score: number; matchedWords: string[] }> = {};
@@ -188,12 +206,11 @@ export function generateCompositionFromPrompt(
   if (matched.length > 0) {
     const matchedKeys = matched.map(([k]) => k);
 
-    // If lamp is matched together with a primary subject, lamp should be background!
+    // If lamp, flowers, or folder is matched with a primary subject, it should be background!
     const hasLamp = matchedKeys.includes('lamp');
     const hasFlowers = matchedKeys.includes('flowers');
     const hasFolder = matchedKeys.includes('folder');
 
-    // Find primary subject candidates
     const primaryCandidates = matchedKeys.filter(k =>
       ['notebook', 'headphones', 'wallet', 'phone'].includes(k)
     );
@@ -284,118 +301,100 @@ export function generateCompositionFromPrompt(
     recPalette = 'mint';
   }
 
-  // 2. Select appropriate asset detail size (L vs S) to match studio proportions
-  // S is used for background items and items resting on other items to avoid clipping
+  // 2. Spatial distribution coordinates matching the studio reference cards
   const rawItems: CanvasItem[] = [];
   const now = Date.now();
 
-  // Background Item (depth)
+  let bgX = 350;
+  let bgY = 250;
+  let heroX = 520;
+  let heroY = 650;
+  let accX = 480;
+  let accY = 770;
+
+  if (format === '1:1') {
+    // Exact 1:1 distribution: Upper half (y ~ 220..270), Lower half (y ~ 640..680)
+    if (bgKey === 'lamp') { bgX = 310; bgY = 270; }
+    else if (bgKey === 'flowers') { bgX = 520; bgY = 230; }
+    else if (bgKey === 'folder') { bgX = 370; bgY = 220; }
+    else if (bgKey === 'puzzle') { bgX = 460; bgY = 290; }
+
+    if (heroKey === 'headphones') { heroX = 530; heroY = 670; }
+    else if (heroKey === 'phone') { heroX = 500; heroY = 680; }
+    else if (heroKey === 'wallet') { heroX = 460; heroY = 680; }
+    else if (heroKey === 'notebook') { heroX = 540; heroY = 580; }
+    else if (heroKey === 'folder') { heroX = 540; heroY = 660; }
+
+    if (accentKey === 'pen') { accX = 280; accY = 750; }
+    else if (accentKey === 'coin') { accX = 640; accY = 730; }
+    else if (heroKey === 'notebook' && accentKey === 'phone') { accX = 650; accY = 480; }
+  } else if (format === '16:9') {
+    // 16:9 Banner distribution: Left side (x ~ 340), Right side (x ~ 720), Front (x ~ 620)
+    bgX = 340; bgY = 260;
+    heroX = 720; heroY = 390;
+    accX = 620; accY = 530;
+    if (heroKey === 'notebook' && accentKey === 'phone') { accX = 810; accY = 360; }
+  } else if (format === '9:16') {
+    // 9:16 Stories distribution: Upper third (y ~ 340), Middle third (y ~ 690), Lower third (y ~ 940)
+    bgX = 338; bgY = 340;
+    heroX = 338; heroY = 690;
+    accX = 338; accY = 940;
+    if (heroKey === 'notebook' && accentKey === 'phone') { accX = 420; accY = 660; }
+  } else {
+    // 4:3 Card distribution
+    bgX = 340; bgY = 250;
+    heroX = 640; heroY = 460;
+    accX = 550; accY = 600;
+    if (heroKey === 'notebook' && accentKey === 'phone') { accX = 720; accY = 430; }
+  }
+
+  // 1. Background Item
   if (bgKey) {
-    const bgDetailSize: DetailSize =
-      ['lamp', 'folder', 'flowers', 'notebook'].includes(bgKey) ? 'S' : 'S';
-
-    let bgX = cx - 120;
-    let bgY = cy - 140;
-
-    if (format === '16:9') {
-      bgX = cx - 260;
-      bgY = cy - 70;
-    } else if (format === '9:16') {
-      bgX = cx;
-      bgY = cy - 220;
-    } else if (format === '4:3') {
-      bgX = cx - 160;
-      bgY = cy - 90;
-    }
-
+    const bgSize = getCanonicalDetailSize(bgKey, false, true);
     rawItems.push({
       id: `item-${now}-bg`,
       objectType: bgKey,
-      size: bgDetailSize,
+      size: bgSize,
       state: 'bg',
       x: bgX,
       y: bgY,
-      scale: 0.90,
+      scale: 0.95,
       rotation: 0,
       zIndex: 5
     });
   }
 
-  // Hero Item (foreground subject)
-  const heroDetailSize: DetailSize =
-    heroKey === 'notebook' && (bgKey || accentKey) ? 'S' : 'L';
-
-  let heroX = bgKey ? cx + 50 : cx;
-  let heroY = bgKey ? cy + 50 : cy;
-
-  if (format === '16:9') {
-    heroX = bgKey ? cx + 90 : cx;
-    heroY = bgKey ? cy + 40 : cy;
-  } else if (format === '9:16') {
-    heroX = cx;
-    heroY = bgKey ? cy + 50 : cy;
-  } else if (format === '4:3') {
-    heroX = bgKey ? cx + 60 : cx;
-    heroY = bgKey ? cy + 40 : cy;
-  }
-
+  // 2. Hero Item
+  const heroSize = getCanonicalDetailSize(heroKey, true, Boolean(bgKey || accentKey));
   rawItems.push({
     id: `item-${now}-hero`,
     objectType: heroKey,
-    size: heroDetailSize,
+    size: heroSize,
     state: 'main',
     x: heroX,
     y: heroY,
-    scale: 0.90,
+    scale: 0.95,
     rotation: 0,
     zIndex: 20
   });
 
-  // Accent / Companion Item
+  // 3. Accent Item
   if (accentKey) {
-    if (heroKey === 'notebook' && accentKey === 'phone') {
-      // Special studio case: phone rests on the right page of the notebook
-      rawItems.push({
-        id: `item-${now}-accent`,
-        objectType: 'phone',
-        size: 'S',
-        state: 'main',
-        x: heroX + 130,
-        y: heroY - 30,
-        scale: 0.85,
-        rotation: 0,
-        zIndex: 25
-      });
-    } else {
-      let accX = heroX - 70;
-      let accY = heroY + 150;
-
-      if (format === '16:9') {
-        accX = heroX - 50;
-        accY = heroY + 140;
-      } else if (format === '9:16') {
-        accX = cx - 30;
-        accY = heroY + 240;
-      } else if (format === '4:3') {
-        accX = heroX - 50;
-        accY = heroY + 140;
-      }
-
-      rawItems.push({
-        id: `item-${now}-accent`,
-        objectType: accentKey,
-        size: 'S',
-        state: 'main',
-        x: accX,
-        y: accY,
-        scale: 0.95,
-        rotation: 0,
-        zIndex: 30
-      });
-    }
+    const accSize = accentKey === 'phone' ? 'S' : getCanonicalDetailSize(accentKey, false, true);
+    rawItems.push({
+      id: `item-${now}-accent`,
+      objectType: accentKey,
+      size: accSize,
+      state: 'main',
+      x: accX,
+      y: accY,
+      scale: 0.95,
+      rotation: 0,
+      zIndex: 30
+    });
   }
 
-  // 3. Auto-fit and center: strictly eliminates all clipping across any screen/format
+  // 4. Auto-fit and center: guarantees safe 50px padding from all canvas borders
   const finalItems = fitAndCenterScene(rawItems, format, 50);
 
   // Construct transparent rationale
@@ -430,49 +429,16 @@ export function generateCompositionFromPrompt(
 export function generateCompositionFromComponents(
   componentNames: string[],
   format: CanvasFormat,
-  detailSize: DetailSize = 'L'
+  _detailSize: DetailSize = 'L'
 ): CanvasItem[] {
-  const cfg = FORMATS[format];
-  const cx = Math.round(cfg.width / 2);
-  const cy = Math.round(cfg.height / 2);
-
   const validKeys = componentNames.filter(name => OBJECT_CATALOG[name]);
   if (validKeys.length === 0) return [];
-
-  const items: CanvasItem[] = [];
-  const now = Date.now();
 
   // If 1 item selected: automatically pair it with a natural companion (2 items total)
   if (validKeys.length === 1) {
     const hero = validKeys[0];
     const companions = NATURAL_COMPANIONS[hero] || { bg: 'flowers', accent: 'puzzle' };
-    const bg = companions.bg;
-
-    items.push({
-      id: `item-batch-${now}-bg`,
-      objectType: bg,
-      size: ['lamp', 'folder', 'flowers', 'notebook'].includes(bg) ? 'S' : detailSize,
-      state: 'bg',
-      x: cx - 120,
-      y: cy - 140,
-      scale: 0.90,
-      rotation: 0,
-      zIndex: 5
-    });
-
-    items.push({
-      id: `item-batch-${now}-hero`,
-      objectType: hero,
-      size: hero === 'notebook' ? 'S' : detailSize,
-      state: 'main',
-      x: cx + 50,
-      y: cy + 50,
-      scale: 0.90,
-      rotation: 0,
-      zIndex: 20
-    });
-
-    return fitAndCenterScene(items, format, 50);
+    return generateCompositionFromPrompt(hero + ' ' + companions.bg, format).items;
   }
 
   // If 2 items selected: 1 Background + 1 Hero
@@ -481,32 +447,7 @@ export function generateCompositionFromComponents(
     const isFirstBg = bgTypes.includes(validKeys[0]) && !bgTypes.includes(validKeys[1]);
     const bg = isFirstBg ? validKeys[0] : validKeys[1];
     const hero = isFirstBg ? validKeys[1] : validKeys[0];
-
-    items.push({
-      id: `item-batch-${now}-bg`,
-      objectType: bg,
-      size: ['lamp', 'folder', 'flowers', 'notebook'].includes(bg) ? 'S' : detailSize,
-      state: 'bg',
-      x: cx - 120,
-      y: cy - 140,
-      scale: 0.90,
-      rotation: 0,
-      zIndex: 5
-    });
-
-    items.push({
-      id: `item-batch-${now}-hero`,
-      objectType: hero,
-      size: hero === 'notebook' ? 'S' : detailSize,
-      state: 'main',
-      x: cx + 50,
-      y: cy + 50,
-      scale: 0.90,
-      rotation: 0,
-      zIndex: 20
-    });
-
-    return fitAndCenterScene(items, format, 50);
+    return generateCompositionFromPrompt(`${hero} фоновая ${bg}`, format).items;
   }
 
   // If 3+ items: Keep 3 items (Hero, Background, Accent)
@@ -515,41 +456,5 @@ export function generateCompositionFromComponents(
   const accentCandidate = validKeys.find(k => ['coin', 'pen', 'puzzle'].includes(k) && k !== bgCandidate) || validKeys[2];
   const heroCandidate = validKeys.find(k => k !== bgCandidate && k !== accentCandidate) || validKeys[0];
 
-  items.push({
-    id: `item-batch-${now}-bg`,
-    objectType: bgCandidate,
-    size: ['lamp', 'folder', 'flowers', 'notebook'].includes(bgCandidate) ? 'S' : detailSize,
-    state: 'bg',
-    x: cx - 120,
-    y: cy - 140,
-    scale: 0.90,
-    rotation: 0,
-    zIndex: 5
-  });
-
-  items.push({
-    id: `item-batch-${now}-hero`,
-    objectType: heroCandidate,
-    size: heroCandidate === 'notebook' ? 'S' : detailSize,
-    state: 'main',
-    x: cx + 50,
-    y: cy + 50,
-    scale: 0.90,
-    rotation: 0,
-    zIndex: 20
-  });
-
-  items.push({
-    id: `item-batch-${now}-accent`,
-    objectType: accentCandidate,
-    size: 'S',
-    state: 'main',
-    x: cx - 70,
-    y: cy + 150,
-    scale: 0.95,
-    rotation: 0,
-    zIndex: 30
-  });
-
-  return fitAndCenterScene(items, format, 50);
+  return generateCompositionFromPrompt(`${heroCandidate} фоновая ${bgCandidate} ${accentCandidate}`, format).items;
 }

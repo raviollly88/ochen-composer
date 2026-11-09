@@ -95,13 +95,15 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
   const sortedItems = [...items].sort((a, b) => a.zIndex - b.zIndex);
 
   return (
-    <div className="relative flex items-center justify-center p-6 w-full h-full overflow-hidden select-none">
+    <div className="relative flex items-center justify-center p-4 w-full h-full overflow-hidden select-none">
       <div
-        className="relative transition-all duration-300 shadow-2xl rounded-2xl overflow-hidden border border-zinc-800/80 bg-zinc-950"
+        className="relative transition-all duration-300 shadow-2xl rounded-2xl overflow-hidden border border-zinc-800/80 bg-zinc-950 flex items-center justify-center"
         style={{
-          width: '100%',
-          maxWidth: `${cfg.width}px`,
           aspectRatio: cfg.aspectRatio,
+          maxWidth: '100%',
+          maxHeight: 'calc(100vh - 96px)',
+          width: `min(100%, calc((100vh - 96px) * ${cfg.width / cfg.height}))`,
+          height: `min(calc(100vh - 96px), calc(100% * ${cfg.height / cfg.width}))`,
         }}
       >
         <svg

@@ -15,20 +15,32 @@ PALETTES = {
     "purple": {
         "id": "purple",
         "name": "Purple Mist",
-        "bgPrimary": "#d7cdf5",
-        "bgDark": "#7864d7"
+        "bgPrimary": "#d6cdf4",
+        "bgMedium": "#aa9aef",
+        "bgDark": "#7764d6",
+        "accentYellow": "#f9ebaf",
+        "accentCoral": "#f9a3aa",
+        "accentPale": "#ffe2e1",
     },
     "peach": {
         "id": "peach",
         "name": "Warm Peach",
-        "bgPrimary": "#fdd7b9",
-        "bgDark": "#d27532"
+        "bgPrimary": "#fdd6b8",
+        "bgMedium": "#f9c895",
+        "bgDark": "#d17431",
+        "accentYellow": "#f9ebaf",
+        "accentCoral": "#80dada",
+        "accentPale": "#bdebeb",
     },
     "mint": {
         "id": "mint",
         "name": "Fresh Mint",
-        "bgPrimary": "#beebeb",
-        "bgDark": "#5abebe"
+        "bgPrimary": "#bdeaea",
+        "bgMedium": "#7fdada",
+        "bgDark": "#59bdbd",
+        "accentYellow": "#ffd3f1",
+        "accentCoral": "#6d7bfb",
+        "accentPale": "#b6c6fd",
     }
 }
 
@@ -71,20 +83,35 @@ def auto_fit_scene(items, W, H, margin=50):
 
     return fitted
 
-def adapt_color(fill, palette, is_monochrome):
+def adapt_color(fill, pal, is_mono):
     if not fill:
         return fill
     f = fill.lower()
-    if f in ("#181817", "#000000", "#ffffff"):
+    if f in ("#181816", "#181817", "#000000", "#ffffff"):
         return fill
-    if is_monochrome:
-        if f in ("#d7cdf5", "#fdd7b9", "#beebeb", "#aa9bf0", "#fac896", "#80dada"):
-            return palette["bgPrimary"]
-        return palette["bgDark"]
-    if f in ("#d7cdf5", "#fdd7b9", "#beebeb"):
-        return palette["bgPrimary"]
-    if f in ("#7864d7", "#d27532", "#5abebe"):
-        return palette["bgDark"]
+    if is_mono:
+        if f in ("#d6cdf4", "#d7cdf5", "#fdd6b8", "#fdd7b9", "#bdeaea", "#beebeb", "#ffe2e1", "#bdebeb", "#b6c6fd", "#fce4a6", "#f9ebaf", "#f9ecb0"):
+            return pal["bgPrimary"]
+        if f in ("#aa9aef", "#aa9bf0", "#f9c895", "#fac896", "#7fdada", "#80dada", "#f9a3aa", "#f48c8c"):
+            return pal.get("bgMedium", pal["bgPrimary"])
+        return pal["bgDark"]
+
+    # Main color objects:
+    if f in ("#d6cdf4", "#d7cdf5", "#fdd6b8", "#fdd7b9", "#bdeaea", "#beebeb"):
+        return pal["bgPrimary"]
+    if f in ("#aa9aef", "#aa9bf0", "#f9c895", "#fac896", "#7fdada", "#80dada"):
+        return pal.get("bgMedium", pal["bgPrimary"])
+    if f in ("#7764d6", "#7864d7", "#d17431", "#d27532", "#59bdbd", "#5abebe"):
+        return pal["bgDark"]
+
+    # Object accents
+    if f in ("#f9ebaf", "#fce4a6", "#f9ecb0"):
+        return pal["accentYellow"]
+    if f in ("#f9a3aa", "#f48c8c", "#f28585", "#6d7bfb", "#80dada"):
+        return pal["accentCoral"]
+    if f in ("#ffe2e1", "#ffd4f2", "#ffd3f1", "#fbe6e6", "#fac8d4", "#bdebeb", "#b6c6fd"):
+        return pal["accentPale"]
+
     return fill
 
 def build_svg(items, format_key, palette_key, show_decor=True):
@@ -162,28 +189,28 @@ def build_svg(items, format_key, palette_key, show_decor=True):
 
 
 # 1. Composition 1: 16:9 Banner - "Конспекты и лекции" (Purple Mist)
-# Studio Layout: Lamp (S bg) in background, Notebook (S main) in center, Phone (S main) resting on page, Pen in front
+# Studio Layout: Lamp (S bg) at (340, 260), Notebook (S main) at (720, 390), Phone (S main) at (810, 360), Pen (S main) at (620, 530)
 sample1 = [
-    {"objectType": "lamp", "size": "S", "state": "bg", "x": 340, "y": 270, "scale": 0.90, "zIndex": 5},
-    {"objectType": "notebook", "size": "S", "state": "main", "x": 680, "y": 410, "scale": 0.95, "zIndex": 15},
-    {"objectType": "phone", "size": "S", "state": "main", "x": 810, "y": 380, "scale": 0.85, "zIndex": 25},
-    {"objectType": "pen", "size": "S", "state": "main", "x": 640, "y": 550, "scale": 0.95, "zIndex": 30}
+    {"objectType": "lamp", "size": "S", "state": "bg", "x": 340, "y": 260, "scale": 0.95, "zIndex": 5},
+    {"objectType": "notebook", "size": "S", "state": "main", "x": 720, "y": 390, "scale": 0.95, "zIndex": 15},
+    {"objectType": "phone", "size": "S", "state": "main", "x": 810, "y": 360, "scale": 0.85, "zIndex": 25},
+    {"objectType": "pen", "size": "S", "state": "main", "x": 620, "y": 530, "scale": 0.95, "zIndex": 30}
 ]
 
 # 2. Composition 2: 1:1 Square - "Личные финансы и бюджет" (Warm Peach)
-# Studio Layout: Folder (S bg) in background, Wallet (L main) in foreground, Gold coin (S main) in front
+# Studio Layout: Folder (S bg) at (440, 250), Wallet (L main) at (530, 710), Gold coin (L main) at (710, 760)
 sample2 = [
-    {"objectType": "folder", "size": "S", "state": "bg", "x": 380, "y": 360, "scale": 0.95, "zIndex": 5},
-    {"objectType": "wallet", "size": "L", "state": "main", "x": 560, "y": 550, "scale": 0.95, "zIndex": 20},
-    {"objectType": "coin", "size": "S", "state": "main", "x": 440, "y": 700, "scale": 1.0, "zIndex": 30}
+    {"objectType": "folder", "size": "S", "state": "bg", "x": 440, "y": 250, "scale": 0.95, "zIndex": 5},
+    {"objectType": "wallet", "size": "L", "state": "main", "x": 530, "y": 710, "scale": 0.95, "zIndex": 20},
+    {"objectType": "coin", "size": "L", "state": "main", "x": 710, "y": 760, "scale": 0.95, "zIndex": 30}
 ]
 
 # 3. Composition 3: 9:16 Stories - "Музыка и технологии" (Fresh Mint)
-# Studio Layout: Flowers (S bg) in background depth, Headphones (L main) in center foreground, Puzzle (S main) at bottom
+# Studio Layout: Flowers (S bg) at (338, 340), Headphones (L main) at (338, 690), Puzzle (S main) at (338, 940)
 sample3 = [
-    {"objectType": "flowers", "size": "S", "state": "bg", "x": 338, "y": 380, "scale": 0.90, "zIndex": 5},
-    {"objectType": "headphones", "size": "L", "state": "main", "x": 338, "y": 650, "scale": 0.85, "zIndex": 20},
-    {"objectType": "puzzle", "size": "S", "state": "main", "x": 300, "y": 860, "scale": 0.95, "zIndex": 25}
+    {"objectType": "flowers", "size": "S", "state": "bg", "x": 338, "y": 340, "scale": 0.90, "zIndex": 5},
+    {"objectType": "headphones", "size": "L", "state": "main", "x": 338, "y": 690, "scale": 0.88, "zIndex": 20},
+    {"objectType": "puzzle", "size": "S", "state": "main", "x": 338, "y": 940, "scale": 0.95, "zIndex": 25}
 ]
 
 tasks = [
