@@ -9,37 +9,49 @@ export interface AICompositionResult {
   rationale: string;
 }
 
-// Preset themes for quick 1-click test demonstrations
-export const PRESET_THEMES = [
+export interface PresetTheme {
+  title: string;
+  description: string;
+  prompt: string;
+  palette: PaletteId;
+}
+
+export const PRESET_THEMES: PresetTheme[] = [
   {
-    title: 'Учеба и продуктивность',
-    description: 'Конспекты, аудиолекции и фокус на знаниях',
-    prompt: 'онлайн учеба конспекты фокус подготовка к экзаменам'
+    title: 'Конспекты и продуктивность',
+    description: 'Открытый блокнот, смартфон на странице, настольная лампа и стилус',
+    prompt: 'конспекты учеба продуктивность блокнот лекции знания фокус',
+    palette: 'purple'
   },
   {
-    title: 'Личные финансы и инвестиции',
-    description: 'Управление бюджетом, мобильный банк и накопления',
-    prompt: 'финансы деньги инвестиции накопления кошелек бюджет'
+    title: 'Личные финансы и бюджет',
+    description: 'Кожаный кошелек, папка документов, монеты и онлайн-банк',
+    prompt: 'финансы деньги кошелек бюджет инвестиции сбережения банк монеты',
+    palette: 'peach'
   },
   {
     title: 'Запуск IT-стартапа',
-    description: 'Технологии, поиск решений и сборка продукта',
-    prompt: 'стартап технологии приложение разработка команда пазл'
+    description: 'Смартфон с пазлами сборки продукта, наушники для созвонов и инвестиции',
+    prompt: 'стартап технологии приложение код сборка пазл команда разработка',
+    palette: 'mint'
   },
   {
     title: 'Рабочее место и организация',
-    description: 'Офис, документы, светлая рабочая атмосфера',
-    prompt: 'работа офис документы отчет лампа планирование'
+    description: 'Настольная лампа, папка договоров, открытый блокнот и ручка',
+    prompt: 'рабочее место офис организация лампа документы порядок отчет',
+    palette: 'purple'
   },
   {
-    title: 'Творчество и контент',
-    description: 'Дизайн, вдохновение и авторские проекты',
-    prompt: 'творчество дизайн цветы стилус красота вдохновение'
+    title: 'Творчество и авторский дизайн',
+    description: 'Ваза с цветами, стилус для рисования, смартфон и блокнот идей',
+    prompt: 'творчество дизайн цветы искусство вдохновение автор проект',
+    palette: 'peach'
   }
 ];
 
 /**
- * Analyzes a text prompt/metaphor and selects appropriate objects, states, and coordinates.
+ * Calculates harmonious isometric coordinates inspired by Studio Ochen reference compositions.
+ * Prevents overlap collisions and eliminates awkward empty spaces.
  */
 export function generateCompositionFromPrompt(
   prompt: string,
@@ -50,280 +62,665 @@ export function generateCompositionFromPrompt(
   const formatConfig = FORMATS[format];
   const W = formatConfig.width;
   const H = formatConfig.height;
+  const cx = Math.round(W / 2);
+  const cy = Math.round(H / 2);
 
-  // 1. Semantic scoring of objects
-  const scores: Record<string, number> = {};
-  for (const [key, meta] of Object.entries(OBJECT_CATALOG)) {
-    let score = 0;
-    if (pLower.includes(key) || pLower.includes(meta.labelRu.toLowerCase())) {
-      score += 10;
-    }
-    for (const tag of meta.tags) {
-      if (pLower.includes(tag)) {
-        score += 4;
-      }
-    }
-    scores[key] = score;
-  }
-
-  // Fallbacks if prompt is generic or doesn't match specific tags
-  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  let selectedKeys = sorted.filter(([_, s]) => s > 0).map(([k]) => k);
-
-  if (selectedKeys.length === 0) {
-    selectedKeys = ['phone', 'notebook', 'headphones', 'coin'];
-  } else if (selectedKeys.length === 1) {
-    const first = selectedKeys[0];
-    if (first === 'phone') selectedKeys.push('coin', 'headphones', 'puzzle');
-    else if (first === 'notebook') selectedKeys.push('pen', 'lamp', 'headphones');
-    else if (first === 'wallet' || first === 'coin') selectedKeys.push('phone', 'folder');
-    else selectedKeys.push('notebook', 'phone', 'pen');
-  } else if (selectedKeys.length < 3) {
-    selectedKeys.push('puzzle', 'pen');
-  }
-
-  const finalKeys = selectedKeys.slice(0, Math.min(selectedKeys.length, 4));
-
+  // 1. Determine palette
   let recPalette: PaletteId = 'purple';
-  if (pLower.includes('деньги') || pLower.includes('финанс') || pLower.includes('стартап') || pLower.includes('банк')) {
+  if (
+    pLower.includes('деньги') ||
+    pLower.includes('финанс') ||
+    pLower.includes('банк') ||
+    pLower.includes('бюджет') ||
+    pLower.includes('кошелек') ||
+    pLower.includes('инвестиц') ||
+    pLower.includes('монет')
+  ) {
     recPalette = 'peach';
-  } else if (pLower.includes('природ') || pLower.includes('свеж') || pLower.includes('эколог') || pLower.includes('технолог')) {
+  } else if (
+    pLower.includes('стартап') ||
+    pLower.includes('технолог') ||
+    pLower.includes('приложен') ||
+    pLower.includes('ит') ||
+    pLower.includes('пазл') ||
+    pLower.includes('свеж') ||
+    pLower.includes('мят')
+  ) {
     recPalette = 'mint';
   }
 
   const items: CanvasItem[] = [];
-  const cx = W / 2;
-  const cy = H / 2;
+  let rationale = '';
+  const now = Date.now();
 
-  if (format === '16:9') {
-    items.push({
-      id: `item-${Date.now()}-1`,
-      objectType: finalKeys[0],
-      size: detailSize,
-      state: 'main',
-      x: cx - 20,
-      y: cy + 10,
-      scale: 0.28,
-      rotation: 0,
-      zIndex: 20
-    });
-
-    if (finalKeys[1]) {
+  // SCENARIO A: Finance / Budget
+  if (
+    pLower.includes('финанс') ||
+    pLower.includes('деньги') ||
+    pLower.includes('кошелек') ||
+    pLower.includes('бюджет') ||
+    pLower.includes('инвест')
+  ) {
+    if (format === '16:9') {
       items.push({
-        id: `item-${Date.now()}-2`,
-        objectType: finalKeys[1],
+        id: `item-${now}-1`,
+        objectType: 'folder',
+        size: detailSize,
+        state: 'bg',
+        x: cx - 180,
+        y: cy - 30,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'wallet',
+        size: detailSize,
+        state: 'main',
+        x: cx + 10,
+        y: cy + 40,
+        scale: 0.36,
+        rotation: 0,
+        zIndex: 20
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'phone',
         size: detailSize,
         state: 'main',
         x: cx + 220,
         y: cy - 40,
-        scale: 0.24,
+        scale: 0.30,
         rotation: 0,
         zIndex: 15
       });
-    }
-
-    if (finalKeys[2]) {
       items.push({
-        id: `item-${Date.now()}-3`,
-        objectType: finalKeys[2],
-        size: detailSize,
-        state: 'bg',
-        x: cx - 240,
-        y: cy - 30,
-        scale: 0.25,
-        rotation: 0,
-        zIndex: 10
-      });
-    }
-
-    if (finalKeys[3]) {
-      items.push({
-        id: `item-${Date.now()}-4`,
-        objectType: finalKeys[3],
+        id: `item-${now}-4`,
+        objectType: 'coin',
         size: 'S',
         state: 'main',
-        x: cx + 120,
+        x: cx - 100,
         y: cy + 120,
-        scale: 0.35,
+        scale: 0.42,
         rotation: 0,
         zIndex: 25
       });
-    }
-  } else if (format === '1:1') {
-    items.push({
-      id: `item-${Date.now()}-1`,
-      objectType: finalKeys[0],
-      size: detailSize,
-      state: 'main',
-      x: cx,
-      y: cy + 30,
-      scale: 0.32,
-      rotation: 0,
-      zIndex: 20
-    });
-
-    if (finalKeys[1]) {
       items.push({
-        id: `item-${Date.now()}-2`,
-        objectType: finalKeys[1],
+        id: `item-${now}-5`,
+        objectType: 'coin',
+        size: 'S',
+        state: 'bg',
+        x: cx + 140,
+        y: cy + 110,
+        scale: 0.34,
+        rotation: 0,
+        zIndex: 18
+      });
+    } else if (format === '1:1') {
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'folder',
         size: detailSize,
         state: 'bg',
-        x: cx - 140,
-        y: cy - 100,
+        x: cx - 110,
+        y: cy - 80,
+        scale: 0.30,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'wallet',
+        size: detailSize,
+        state: 'main',
+        x: cx - 10,
+        y: cy + 30,
+        scale: 0.38,
+        rotation: 0,
+        zIndex: 20
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx + 140,
+        y: cy - 60,
         scale: 0.28,
         rotation: 0,
-        zIndex: 10
+        zIndex: 15
       });
-    }
-
-    if (finalKeys[2]) {
       items.push({
-        id: `item-${Date.now()}-3`,
-        objectType: finalKeys[2],
+        id: `item-${now}-4`,
+        objectType: 'coin',
+        size: 'S',
+        state: 'main',
+        x: cx - 90,
+        y: cy + 120,
+        scale: 0.42,
+        rotation: 0,
+        zIndex: 25
+      });
+      items.push({
+        id: `item-${now}-5`,
+        objectType: 'coin',
+        size: 'S',
+        state: 'bg',
+        x: cx + 90,
+        y: cy + 110,
+        scale: 0.34,
+        rotation: 0,
+        zIndex: 18
+      });
+    } else if (format === '9:16') {
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'folder',
+        size: detailSize,
+        state: 'bg',
+        x: cx + 20,
+        y: cy - 200,
+        scale: 0.28,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx,
+        y: cy - 40,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 15
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'wallet',
+        size: detailSize,
+        state: 'main',
+        x: cx - 40,
+        y: cy + 140,
+        scale: 0.36,
+        rotation: 0,
+        zIndex: 20
+      });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'coin',
+        size: 'S',
+        state: 'main',
+        x: cx + 70,
+        y: cy + 240,
+        scale: 0.42,
+        rotation: 0,
+        zIndex: 25
+      });
+    } else {
+      // 4:3
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'folder',
+        size: detailSize,
+        state: 'bg',
+        x: cx - 120,
+        y: cy - 60,
+        scale: 0.30,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'wallet',
+        size: detailSize,
+        state: 'main',
+        x: cx - 10,
+        y: cy + 30,
+        scale: 0.36,
+        rotation: 0,
+        zIndex: 20
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'phone',
         size: detailSize,
         state: 'main',
         x: cx + 150,
-        y: cy - 40,
-        scale: 0.26,
+        y: cy - 50,
+        scale: 0.28,
         rotation: 0,
         zIndex: 15
       });
-    }
-
-    if (finalKeys[3]) {
       items.push({
-        id: `item-${Date.now()}-4`,
-        objectType: finalKeys[3],
+        id: `item-${now}-4`,
+        objectType: 'coin',
         size: 'S',
         state: 'main',
-        x: cx - 40,
-        y: cy + 150,
+        x: cx - 100,
+        y: cy + 120,
+        scale: 0.40,
+        rotation: 0,
+        zIndex: 25
+      });
+    }
+    rationale = 'Сформирован финансовый кластер: папка отчетов на заднем плане, кошелек в центре внимания, смартфон мобильного банка и золотые монеты на переднем плане.';
+  }
+  // SCENARIO B: Startup / IT / Tech
+  else if (
+    pLower.includes('стартап') ||
+    pLower.includes('технолог') ||
+    pLower.includes('приложен') ||
+    pLower.includes('ит') ||
+    pLower.includes('пазл') ||
+    pLower.includes('продукт')
+  ) {
+    if (format === '16:9') {
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'headphones',
+        size: detailSize,
+        state: 'bg',
+        x: cx - 220,
+        y: cy - 20,
+        scale: 0.30,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx + 10,
+        y: cy + 20,
+        scale: 0.34,
+        rotation: 0,
+        zIndex: 20
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'puzzle',
+        size: detailSize,
+        state: 'main',
+        x: cx + 180,
+        y: cy - 60,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 25
+      });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'coin',
+        size: 'S',
+        state: 'main',
+        x: cx + 110,
+        y: cy + 120,
         scale: 0.38,
         rotation: 0,
-        zIndex: 25
+        zIndex: 30
       });
-    }
-  } else if (format === '9:16') {
-    items.push({
-      id: `item-${Date.now()}-1`,
-      objectType: finalKeys[0],
-      size: detailSize,
-      state: 'main',
-      x: cx,
-      y: cy - 60,
-      scale: 0.28,
-      rotation: 0,
-      zIndex: 20
-    });
-
-    if (finalKeys[1]) {
+    } else if (format === '1:1') {
       items.push({
-        id: `item-${Date.now()}-2`,
-        objectType: finalKeys[1],
+        id: `item-${now}-1`,
+        objectType: 'phone',
         size: detailSize,
         state: 'main',
-        x: cx - 80,
-        y: cy + 180,
-        scale: 0.26,
+        x: cx - 20,
+        y: cy + 20,
+        scale: 0.36,
         rotation: 0,
-        zIndex: 25
+        zIndex: 20
       });
-    }
-
-    if (finalKeys[2]) {
       items.push({
-        id: `item-${Date.now()}-3`,
-        objectType: finalKeys[2],
-        size: detailSize,
-        state: 'bg',
-        x: cx + 80,
-        y: cy - 260,
-        scale: 0.25,
-        rotation: 0,
-        zIndex: 10
-      });
-    }
-
-    if (finalKeys[3]) {
-      items.push({
-        id: `item-${Date.now()}-4`,
-        objectType: finalKeys[3],
-        size: 'S',
-        state: 'bg',
-        x: cx + 100,
-        y: cy + 70,
-        scale: 0.35,
-        rotation: 0,
-        zIndex: 15
-      });
-    }
-  } else {
-    items.push({
-      id: `item-${Date.now()}-1`,
-      objectType: finalKeys[0],
-      size: detailSize,
-      state: 'main',
-      x: cx,
-      y: cy + 20,
-      scale: 0.30,
-      rotation: 0,
-      zIndex: 20
-    });
-
-    if (finalKeys[1]) {
-      items.push({
-        id: `item-${Date.now()}-2`,
-        objectType: finalKeys[1],
+        id: `item-${now}-2`,
+        objectType: 'puzzle',
         size: detailSize,
         state: 'main',
-        x: cx + 160,
+        x: cx + 110,
         y: cy - 70,
-        scale: 0.26,
+        scale: 0.34,
         rotation: 0,
-        zIndex: 15
+        zIndex: 25
       });
-    }
-
-    if (finalKeys[2]) {
       items.push({
-        id: `item-${Date.now()}-3`,
-        objectType: finalKeys[2],
+        id: `item-${now}-3`,
+        objectType: 'headphones',
         size: detailSize,
         state: 'bg',
-        x: cx - 170,
-        y: cy - 60,
-        scale: 0.26,
+        x: cx - 130,
+        y: cy - 70,
+        scale: 0.28,
         rotation: 0,
-        zIndex: 10
+        zIndex: 5
       });
-    }
-
-    if (finalKeys[3]) {
       items.push({
-        id: `item-${Date.now()}-4`,
-        objectType: finalKeys[3],
+        id: `item-${now}-4`,
+        objectType: 'coin',
         size: 'S',
         state: 'main',
         x: cx + 60,
-        y: cy + 130,
-        scale: 0.36,
+        y: cy + 110,
+        scale: 0.40,
+        rotation: 0,
+        zIndex: 30
+      });
+    } else if (format === '9:16') {
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'headphones',
+        size: detailSize,
+        state: 'bg',
+        x: cx,
+        y: cy - 190,
+        scale: 0.28,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx,
+        y: cy - 10,
+        scale: 0.34,
+        rotation: 0,
+        zIndex: 20
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'puzzle',
+        size: detailSize,
+        state: 'main',
+        x: cx - 50,
+        y: cy + 150,
+        scale: 0.32,
         rotation: 0,
         zIndex: 25
       });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'coin',
+        size: 'S',
+        state: 'main',
+        x: cx + 70,
+        y: cy + 220,
+        scale: 0.40,
+        rotation: 0,
+        zIndex: 30
+      });
+    } else {
+      // 4:3
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx - 10,
+        y: cy + 20,
+        scale: 0.34,
+        rotation: 0,
+        zIndex: 20
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'puzzle',
+        size: detailSize,
+        state: 'main',
+        x: cx + 130,
+        y: cy - 60,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 25
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'headphones',
+        size: detailSize,
+        state: 'bg',
+        x: cx - 140,
+        y: cy - 60,
+        scale: 0.28,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'coin',
+        size: 'S',
+        state: 'main',
+        x: cx + 60,
+        y: cy + 110,
+        scale: 0.38,
+        rotation: 0,
+        zIndex: 30
+      });
     }
+    rationale = 'Собрана композиция технологического продукта: мобильное приложение в центре, элементы пазла сборки архитектуры и наушники команды.';
+  }
+  // SCENARIO C: Education / Notes / Default
+  else {
+    // Official Studio reference: Open Notebook + Phone resting on right page + Pen in front + Lamp behind
+    if (format === '16:9') {
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'lamp',
+        size: detailSize,
+        state: 'bg',
+        x: cx - 240,
+        y: cy - 70,
+        scale: 0.28,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'notebook',
+        size: detailSize,
+        state: 'main',
+        x: cx - 20,
+        y: cy + 30,
+        scale: 0.34,
+        rotation: 0,
+        zIndex: 15
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx + 140,
+        y: cy - 30,
+        scale: 0.26,
+        rotation: 0,
+        zIndex: 25
+      });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'pen',
+        size: 'S',
+        state: 'main',
+        x: cx + 10,
+        y: cy + 130,
+        scale: 0.40,
+        rotation: 0,
+        zIndex: 30
+      });
+      items.push({
+        id: `item-${now}-5`,
+        objectType: 'headphones',
+        size: 'S',
+        state: 'bg',
+        x: cx + 260,
+        y: cy + 50,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 10
+      });
+    } else if (format === '1:1') {
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'lamp',
+        size: detailSize,
+        state: 'bg',
+        x: cx - 130,
+        y: cy - 100,
+        scale: 0.26,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'notebook',
+        size: detailSize,
+        state: 'main',
+        x: cx - 10,
+        y: cy + 20,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 15
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx + 120,
+        y: cy - 30,
+        scale: 0.25,
+        rotation: 0,
+        zIndex: 25
+      });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'pen',
+        size: 'S',
+        state: 'main',
+        x: cx + 10,
+        y: cy + 120,
+        scale: 0.40,
+        rotation: 0,
+        zIndex: 30
+      });
+    } else if (format === '9:16') {
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'lamp',
+        size: detailSize,
+        state: 'bg',
+        x: cx,
+        y: cy - 200,
+        scale: 0.28,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'notebook',
+        size: detailSize,
+        state: 'main',
+        x: cx,
+        y: cy - 10,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 15
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx + 100,
+        y: cy - 60,
+        scale: 0.24,
+        rotation: 0,
+        zIndex: 25
+      });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'pen',
+        size: 'S',
+        state: 'main',
+        x: cx + 10,
+        y: cy + 110,
+        scale: 0.38,
+        rotation: 0,
+        zIndex: 30
+      });
+      items.push({
+        id: `item-${now}-5`,
+        objectType: 'headphones',
+        size: 'S',
+        state: 'bg',
+        x: cx,
+        y: cy + 230,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 10
+      });
+    } else {
+      // 4:3
+      items.push({
+        id: `item-${now}-1`,
+        objectType: 'lamp',
+        size: detailSize,
+        state: 'bg',
+        x: cx - 180,
+        y: cy - 70,
+        scale: 0.26,
+        rotation: 0,
+        zIndex: 5
+      });
+      items.push({
+        id: `item-${now}-2`,
+        objectType: 'notebook',
+        size: detailSize,
+        state: 'main',
+        x: cx - 10,
+        y: cy + 20,
+        scale: 0.32,
+        rotation: 0,
+        zIndex: 15
+      });
+      items.push({
+        id: `item-${now}-3`,
+        objectType: 'phone',
+        size: detailSize,
+        state: 'main',
+        x: cx + 120,
+        y: cy - 30,
+        scale: 0.25,
+        rotation: 0,
+        zIndex: 25
+      });
+      items.push({
+        id: `item-${now}-4`,
+        objectType: 'pen',
+        size: 'S',
+        state: 'main',
+        x: cx + 10,
+        y: cy + 120,
+        scale: 0.38,
+        rotation: 0,
+        zIndex: 30
+      });
+    }
+    rationale = 'Собрана эталонная композиция рабочего места: открытый блокнот в центре, смартфон с конспектом на странице, стилус на первом плане и настольная лампа в фоне.';
   }
 
   return {
     title: prompt,
-    matchedTheme: finalKeys.map(k => OBJECT_CATALOG[k]?.labelRu || k).join(' + '),
+    matchedTheme: items.map(it => OBJECT_CATALOG[it.objectType]?.labelRu || it.objectType).join(' + '),
     recommendedPalette: recPalette,
     items,
-    rationale: `Семантический анализатор выделил ключевые образы: ${finalKeys.map(k => OBJECT_CATALOG[k]?.labelRu).join(', ')}. Выстроена сбалансированная изометрическая композиция с чередованием главных и фоновых объектов.`
+    rationale
   };
 }
 
 /**
- * Scenario 2: Builds an isometric composition from manually provided object names/keys.
+ * Scenario 2: Groups manually selected components into a coherent, balanced isometric cluster.
  */
 export function generateCompositionFromComponents(
   componentNames: string[],
@@ -331,33 +728,116 @@ export function generateCompositionFromComponents(
   detailSize: DetailSize = 'L'
 ): CanvasItem[] {
   const formatConfig = FORMATS[format];
-  const cx = formatConfig.width / 2;
-  const cy = formatConfig.height / 2;
+  const cx = Math.round(formatConfig.width / 2);
+  const cy = Math.round(formatConfig.height / 2);
 
   const validKeys = componentNames.filter(name => OBJECT_CATALOG[name]);
   if (validKeys.length === 0) return [];
 
   const items: CanvasItem[] = [];
-  const count = validKeys.length;
+  const now = Date.now();
 
-  validKeys.forEach((key, index) => {
-    const offsetStep = 140;
-    const centerIdx = (count - 1) / 2;
-    const diff = index - centerIdx;
+  // If 1 item: center it
+  if (validKeys.length === 1) {
+    items.push({
+      id: `item-batch-${now}-0`,
+      objectType: validKeys[0],
+      size: detailSize,
+      state: 'main',
+      x: cx,
+      y: cy,
+      scale: 0.36,
+      rotation: 0,
+      zIndex: 20
+    });
+    return items;
+  }
 
-    const x = cx + diff * offsetStep;
-    const y = cy + diff * (offsetStep * 0.45);
+  // If 2 items: primary at center, secondary adjacent along isometric diagonal
+  if (validKeys.length === 2) {
+    items.push({
+      id: `item-batch-${now}-0`,
+      objectType: validKeys[0],
+      size: detailSize,
+      state: 'main',
+      x: cx - 60,
+      y: cy + 20,
+      scale: 0.34,
+      rotation: 0,
+      zIndex: 20
+    });
+    items.push({
+      id: `item-batch-${now}-1`,
+      objectType: validKeys[1],
+      size: detailSize,
+      state: validKeys[1] === 'lamp' || validKeys[1] === 'flowers' ? 'bg' : 'main',
+      x: cx + 90,
+      y: cy - 40,
+      scale: 0.30,
+      rotation: 0,
+      zIndex: 15
+    });
+    return items;
+  }
+
+  // If 3+ items: compose into a tight desk cluster
+  // Order: background items (lamp, flowers, folder) in back, main hero in center, accessories (coin, pen, puzzle) in front
+  const bgTypes = ['lamp', 'flowers', 'folder'];
+  const frontTypes = ['coin', 'pen', 'puzzle'];
+
+  const sortedKeys = [...validKeys].sort((a, b) => {
+    const aIsBg = bgTypes.includes(a) ? -1 : (frontTypes.includes(a) ? 1 : 0);
+    const bIsBg = bgTypes.includes(b) ? -1 : (frontTypes.includes(b) ? 1 : 0);
+    return aIsBg - bIsBg;
+  });
+
+  sortedKeys.forEach((key, index) => {
+    let x = cx;
+    let y = cy;
+    let z = 20;
+    let st: 'main' | 'bg' = 'main';
+    let sc = 0.32;
+
+    if (index === 0 && bgTypes.includes(key)) {
+      // Back item
+      x = cx - 120;
+      y = cy - 80;
+      z = 5;
+      st = 'bg';
+      sc = 0.28;
+    } else if (index === 1 || (index === 0 && !bgTypes.includes(key))) {
+      // Main hero
+      x = cx - 10;
+      y = cy + 10;
+      z = 20;
+      st = 'main';
+      sc = 0.36;
+    } else if (index === 2) {
+      // Right flank
+      x = cx + 130;
+      y = cy - 30;
+      z = 25;
+      st = 'main';
+      sc = 0.30;
+    } else {
+      // Foreground accessory
+      x = cx + (index % 2 === 0 ? -70 : 60);
+      y = cy + 110;
+      z = 30 + index;
+      st = 'main';
+      sc = 0.38;
+    }
 
     items.push({
-      id: `item-manual-${Date.now()}-${index}`,
+      id: `item-batch-${now}-${index}`,
       objectType: key,
       size: detailSize,
-      state: index === 0 ? 'main' : (index % 2 === 1 ? 'main' : 'bg'),
-      x: Math.round(x),
-      y: Math.round(y),
-      scale: 0.26,
+      state: st,
+      x,
+      y,
+      scale: sc,
       rotation: 0,
-      zIndex: 10 + index * 5
+      zIndex: z
     });
   });
 

@@ -32,9 +32,9 @@ export function App() {
 
   const currentPalette = palettes[paletteId] || DEFAULT_PALETTES.purple;
 
-  // Initialize with a ready-to-show composition
+  // Initialize with a clean Studio Ochen reference composition
   useEffect(() => {
-    const initial = generateCompositionFromPrompt('Учеба и продуктивность', '16:9', 'L');
+    const initial = generateCompositionFromPrompt('Конспекты и продуктивность', '16:9', 'L');
     setItems(initial.items);
     setPaletteId(initial.recommendedPalette);
     setLastAiRationale(initial.rationale);
@@ -60,7 +60,7 @@ export function App() {
       state,
       x: Math.round(cfg.width / 2 + offset),
       y: Math.round(cfg.height / 2 + offset),
-      scale: 0.28,
+      scale: 0.32,
       rotation: 0,
       zIndex: maxZ + 5,
     };
@@ -101,7 +101,6 @@ export function App() {
 
   const handleDetailSizeChange = (newSize: DetailSize) => {
     setDetailSize(newSize);
-    // Switch all existing items to new size
     setItems(prev => prev.map(it => ({ ...it, size: newSize })));
   };
 
@@ -143,7 +142,7 @@ export function App() {
   const selectedItem = items.find(it => it.id === selectedItemId) || null;
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 font-sans">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-zinc-950 font-sans">
       <Header
         format={format}
         onFormatChange={setFormat}
@@ -160,7 +159,9 @@ export function App() {
 
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar
+          items={items}
           selectedItem={selectedItem}
+          onSelectItem={setSelectedItemId}
           detailSize={detailSize}
           assetMap={assetMap}
           onAddItem={handleAddItem}
@@ -175,7 +176,7 @@ export function App() {
         />
 
         {/* Main Canvas Area */}
-        <main className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-950/80 isometric-grid relative overflow-hidden">
+        <main className="flex-1 flex flex-col items-center justify-center p-4 bg-zinc-950 isometric-grid relative overflow-hidden">
           <CanvasView
             items={items}
             format={format}

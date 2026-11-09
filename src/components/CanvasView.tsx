@@ -33,6 +33,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
     startY: number;
     origX: number;
     origY: number;
+    hasMoved: boolean;
   } | null>(null);
 
   const handlePointerDown = (e: React.PointerEvent, id: string) => {
@@ -48,6 +49,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
       startY: e.clientY,
       origX: item.x,
       origY: item.y,
+      hasMoved: false,
     });
   };
 
@@ -61,6 +63,10 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
 
       const dx = (e.clientX - dragState.startX) * scaleX;
       const dy = (e.clientY - dragState.startY) * scaleY;
+
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        dragState.hasMoved = true;
+      }
 
       onUpdateItem(dragState.itemId, {
         x: Math.round(dragState.origX + dx),
@@ -86,12 +92,9 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
   const sortedItems = [...items].sort((a, b) => a.zIndex - b.zIndex);
 
   return (
-    <div
-      className="relative flex items-center justify-center p-6 w-full h-full overflow-hidden select-none"
-      onClick={() => onSelectItem(null)}
-    >
+    <div className="relative flex items-center justify-center p-6 w-full h-full overflow-hidden select-none">
       <div
-        className="relative transition-all duration-300 shadow-2xl rounded-2xl overflow-hidden border border-white/10"
+        className="relative transition-all duration-300 shadow-2xl rounded-2xl overflow-hidden border border-zinc-800/80 bg-zinc-950"
         style={{
           width: '100%',
           maxWidth: `${cfg.width}px`,
@@ -102,14 +105,23 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
           ref={svgRef}
           viewBox={`0 0 ${cfg.width} ${cfg.height}`}
           className="w-full h-full block"
-          style={{ backgroundColor: palette.bgPrimary }}
         >
           {/* Subtle drop shadow filter for floating elements */}
           <defs>
             <filter id="element-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="12" stdDeviation="18" floodColor="#000000" floodOpacity="0.12" />
+              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#000000" floodOpacity="0.12" />
             </filter>
           </defs>
+
+          {/* Background rect: clicking here deselects */}
+          <rect
+            width={cfg.width}
+            height={cfg.height}
+            rx={20}
+            fill={palette.bgPrimary}
+            onClick={() => onSelectItem(null)}
+            className="cursor-default"
+          />
 
           {/* Render composition objects */}
           {sortedItems.map(item => {
@@ -127,23 +139,34 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
                 key={item.id}
                 transform={`translate(${item.x}, ${item.y}) rotate(${item.rotation}) scale(${item.scale}) translate(-${ox}, -${oy})`}
                 onPointerDown={e => handlePointerDown(e, item.id)}
+                onClick={e => {
+                  e.stopPropagation();
+                  onSelectItem(item.id);
+                }}
                 className="cursor-grab active:cursor-grabbing transition-opacity"
                 filter="url(#element-shadow)"
               >
-                {/* Visual outline/highlight when selected */}
+                {/* Visual outline/highlight when selected (Figma-style) */}
                 {isSelected && (
-                  <rect
-                    x={-8}
-                    y={-8}
-                    width={asset.w + 16}
-                    height={asset.h + 16}
-                    rx={12}
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth={4}
-                    strokeDasharray="10 6"
-                    className="animate-pulse"
-                  />
+                  <g pointerEvents="none">
+                    <rect
+                      x={-6}
+                      y={-6}
+                      width={asset.w + 12}
+                      height={asset.h + 12}
+                      rx={8}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth={3}
+                      strokeDasharray="8 5"
+                      opacity={0.9}
+                    />
+                    {/* Corner handles */}
+                    <circle cx={-6} cy={-6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                    <circle cx={asset.w + 6} cy={-6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                    <circle cx={-6} cy={asset.h + 6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                    <circle cx={asset.w + 6} cy={asset.h + 6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                  </g>
                 )}
 
                 {/* SVG Paths of object */}
@@ -166,9 +189,9 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
 
         {/* Empty state hint */}
         {items.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-500">
-            <p className="text-lg font-medium">Холст пуст</p>
-            <p className="text-sm">Используйте ИИ-генератор или добавьте элементы из библиотеки</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-zinc-500">
+            <p className="text-base font-medium">Холст пуст</p>
+            <p className="text-xs">Используйте ИИ-сборку или добавьте элементы из библиотеки</p>
           </div>
         )}
       </div>

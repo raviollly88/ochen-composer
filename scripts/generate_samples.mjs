@@ -69,11 +69,11 @@ function buildSVG(items, formatKey, paletteKey) {
     `<?xml version="1.0" encoding="UTF-8"?>`,
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">`,
     `  <defs>`,
-    `    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">`,
-    `      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000000" flood-opacity="0.10"/>`,
+    `    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">`,
+    `      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.10"/>`,
     `    </filter>`,
     `  </defs>`,
-    `  <rect width="${W}" height="${H}" rx="24" fill="${pal.bgPrimary}"/>`,
+    `  <rect width="${W}" height="${H}" rx="20" fill="${pal.bgPrimary}"/>`,
     `  <g id="composition" filter="url(#shadow)">`
   ];
 
@@ -108,34 +108,36 @@ if (!fs.existsSync(outDir)) {
   fs.mkdirSync(outDir, { recursive: true });
 }
 
-// Composition 1: 16:9 Banner - "Учеба и продуктивность" (Purple Mist)
+// Composition 1: 16:9 Banner - "Конспекты и продуктивность" (Purple Mist)
+// Studio Reference: Open Notebook in center, Smartphone resting on right page, Pen in front, Lamp in background
 const sample1 = [
-  { objectType: 'notebook', size: 'L', state: 'main', x: 440, y: 280, scale: 0.28, zIndex: 20 },
-  { objectType: 'phone', size: 'L', state: 'main', x: 680, y: 230, scale: 0.24, zIndex: 25 },
-  { objectType: 'lamp', size: 'L', state: 'bg', x: 220, y: 190, scale: 0.26, zIndex: 10 },
-  { objectType: 'pen', size: 'S', state: 'main', x: 500, y: 390, scale: 0.36, zIndex: 30 },
-  { objectType: 'headphones', size: 'S', state: 'bg', x: 740, y: 350, scale: 0.32, zIndex: 15 }
+  { objectType: 'lamp', size: 'L', state: 'bg', x: 240, y: 200, scale: 0.28, zIndex: 5 },
+  { objectType: 'notebook', size: 'L', state: 'main', x: 460, y: 300, scale: 0.34, zIndex: 15 },
+  { objectType: 'phone', size: 'L', state: 'main', x: 600, y: 240, scale: 0.26, zIndex: 25 },
+  { objectType: 'pen', size: 'S', state: 'main', x: 470, y: 400, scale: 0.40, zIndex: 30 },
+  { objectType: 'headphones', size: 'S', state: 'bg', x: 720, y: 320, scale: 0.32, zIndex: 10 }
 ];
 fs.writeFileSync(path.join(outDir, 'sample-1-education-16x9.svg'), buildSVG(sample1, '16:9', 'purple'), 'utf8');
 
-// Composition 2: 1:1 Square - "Личные финансы и инвестиции" (Warm Peach)
+// Composition 2: 1:1 Square - "Личные финансы и бюджет" (Warm Peach)
+// Studio Reference: Folder in background, Wallet in foreground, Phone, and Coins
 const sample2 = [
-  { objectType: 'wallet', size: 'L', state: 'main', x: 340, y: 380, scale: 0.32, zIndex: 25 },
-  { objectType: 'phone', size: 'L', state: 'main', x: 490, y: 270, scale: 0.28, zIndex: 20 },
-  { objectType: 'coin', size: 'S', state: 'main', x: 240, y: 470, scale: 0.40, zIndex: 30 },
-  { objectType: 'folder', size: 'L', state: 'bg', x: 220, y: 260, scale: 0.26, zIndex: 10 },
-  { objectType: 'coin', size: 'S', state: 'bg', x: 530, y: 460, scale: 0.30, zIndex: 15 }
+  { objectType: 'folder', size: 'L', state: 'bg', x: 250, y: 280, scale: 0.30, zIndex: 5 },
+  { objectType: 'wallet', size: 'L', state: 'main', x: 350, y: 390, scale: 0.38, zIndex: 20 },
+  { objectType: 'phone', size: 'L', state: 'main', x: 500, y: 300, scale: 0.28, zIndex: 15 },
+  { objectType: 'coin', size: 'S', state: 'main', x: 270, y: 480, scale: 0.42, zIndex: 25 },
+  { objectType: 'coin', size: 'S', state: 'bg', x: 450, y: 470, scale: 0.34, zIndex: 18 }
 ];
 fs.writeFileSync(path.join(outDir, 'sample-2-finances-1x1.svg'), buildSVG(sample2, '1:1', 'peach'), 'utf8');
 
-// Composition 3: 9:16 Story - "Запуск IT-стартапа" (Fresh Mint)
+// Composition 3: 9:16 Stories - "Запуск IT-стартапа" (Fresh Mint)
+// Studio Reference: Headphones in background, Smartphone in center, Puzzle pieces, Coin
 const sample3 = [
-  { objectType: 'phone', size: 'L', state: 'main', x: 270, y: 420, scale: 0.30, zIndex: 20 },
-  { objectType: 'puzzle', size: 'L', state: 'main', x: 200, y: 640, scale: 0.28, zIndex: 25 },
-  { objectType: 'folder', size: 'L', state: 'bg', x: 350, y: 210, scale: 0.26, zIndex: 10 },
-  { objectType: 'lamp', size: 'S', state: 'bg', x: 370, y: 530, scale: 0.34, zIndex: 15 },
-  { objectType: 'coin', size: 'S', state: 'main', x: 340, y: 730, scale: 0.38, zIndex: 30 }
+  { objectType: 'headphones', size: 'L', state: 'bg', x: 270, y: 290, scale: 0.28, zIndex: 5 },
+  { objectType: 'phone', size: 'L', state: 'main', x: 270, y: 470, scale: 0.34, zIndex: 20 },
+  { objectType: 'puzzle', size: 'L', state: 'main', x: 220, y: 630, scale: 0.32, zIndex: 25 },
+  { objectType: 'coin', size: 'S', state: 'main', x: 340, y: 700, scale: 0.40, zIndex: 30 }
 ];
 fs.writeFileSync(path.join(outDir, 'sample-3-startup-9x16.svg'), buildSVG(sample3, '9:16', 'mint'), 'utf8');
 
-console.log('Successfully generated 3 pristine sample SVGs in public/samples/');
+console.log('Successfully regenerated all 3 sample SVGs!');

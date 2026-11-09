@@ -96,19 +96,19 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
           <div>
             <h2 className="text-base font-bold text-white">Управление палитрами</h2>
-            <p className="text-xs text-slate-400">
-              Выбирайте готовые палитры Студии, загружайте свои из JSON или настраивайте HEX
+            <p className="text-xs text-zinc-400">
+              Выбирайте палитры студии, загружайте свои из JSON или настраивайте HEX
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
           >
             <X size={18} />
           </button>
@@ -116,7 +116,7 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
 
         {/* Existing Palettes */}
         <div className="mt-4 space-y-2">
-          <span className="text-xs font-semibold text-slate-400">Доступные палитры:</span>
+          <span className="text-xs font-semibold text-zinc-300">Доступные палитры:</span>
           <div className="grid grid-cols-2 gap-2">
             {Object.values(palettes).map((p) => {
               const isActive = activePaletteId === p.id;
@@ -126,27 +126,27 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
                   onClick={() => onSelectPalette(p.id)}
                   className={`flex items-center justify-between p-2.5 rounded-xl border text-xs text-left transition-all ${
                     isActive
-                      ? 'bg-purple-950/40 border-purple-500/60 ring-2 ring-purple-500/30'
-                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                      ? 'bg-zinc-800 border-zinc-500 shadow-sm ring-1 ring-zinc-400'
+                      : 'bg-zinc-950/70 border-zinc-800 hover:border-zinc-700'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="flex -space-x-1.5">
                       <span
-                        className="w-4 h-4 rounded-full border border-black/20 shadow-sm"
+                        className="w-4 h-4 rounded-full border border-black/30 shadow-sm"
                         style={{ backgroundColor: p.bgPrimary }}
                       />
                       <span
-                        className="w-4 h-4 rounded-full border border-black/20 shadow-sm"
+                        className="w-4 h-4 rounded-full border border-black/30 shadow-sm"
                         style={{ backgroundColor: p.bgDark }}
                       />
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-200">{p.nameRu}</div>
-                      <div className="text-[10px] text-slate-500 font-mono">{p.bgPrimary}</div>
+                      <div className="font-semibold text-zinc-100">{p.nameRu}</div>
+                      <div className="text-[10px] text-zinc-500 font-mono">{p.bgPrimary}</div>
                     </div>
                   </div>
-                  {isActive && <Check size={14} className="text-purple-400" />}
+                  {isActive && <Check size={14} className="text-zinc-200" />}
                 </button>
               );
             })}
@@ -154,26 +154,26 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
         </div>
 
         {/* Custom Palette Form */}
-        <form onSubmit={handleCreateCustom} className="mt-5 p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-3">
-          <span className="text-xs font-semibold text-slate-300 block">
+        <form onSubmit={handleCreateCustom} className="mt-5 p-4 rounded-xl bg-zinc-950/70 border border-zinc-800 space-y-3">
+          <span className="text-xs font-semibold text-zinc-300 block">
             Создать новую палитру:
           </span>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">Название:</label>
+              <label className="text-[11px] text-zinc-400 block mb-1">Название:</label>
               <input
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-400"
               />
             </div>
 
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-[11px] text-slate-400 block mb-1">Фон (Primary):</label>
-                <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-lg p-1">
+                <label className="text-[11px] text-zinc-400 block mb-1">Фон (Primary):</label>
+                <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-700 rounded-lg p-1">
                   <input
                     type="color"
                     value={bgPrimary}
@@ -184,14 +184,14 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
                     type="text"
                     value={bgPrimary}
                     onChange={(e) => setBgPrimary(e.target.value)}
-                    className="w-16 bg-transparent text-[11px] text-slate-300 font-mono focus:outline-none"
+                    className="w-16 bg-transparent text-[11px] text-zinc-300 font-mono focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="flex-1">
-                <label className="text-[11px] text-slate-400 block mb-1">Тень (Dark):</label>
-                <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-lg p-1">
+                <label className="text-[11px] text-zinc-400 block mb-1">Тень (Dark):</label>
+                <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-700 rounded-lg p-1">
                   <input
                     type="color"
                     value={bgDark}
@@ -202,7 +202,7 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
                     type="text"
                     value={bgDark}
                     onChange={(e) => setBgDark(e.target.value)}
-                    className="w-16 bg-transparent text-[11px] text-slate-300 font-mono focus:outline-none"
+                    className="w-16 bg-transparent text-[11px] text-zinc-300 font-mono focus:outline-none"
                   />
                 </div>
               </div>
@@ -211,7 +211,7 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
 
           <button
             type="submit"
-            className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-md"
+            className="w-full py-2 bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm"
           >
             <Plus size={14} />
             <span>Добавить и применить палитру</span>
@@ -225,7 +225,7 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
         )}
 
         {/* Footer Actions: Import / Export */}
-        <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+        <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between text-xs">
           <input
             type="file"
             ref={fileInputRef}
@@ -235,7 +235,7 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-all"
           >
             <Upload size={14} />
             <span>Загрузить из JSON</span>
@@ -243,7 +243,7 @@ export const PaletteModal: React.FC<PaletteModalProps> = ({
 
           <button
             onClick={handleExportCurrent}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-all"
           >
             <Download size={14} />
             <span>Экспорт JSON</span>
