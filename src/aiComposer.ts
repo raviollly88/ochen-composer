@@ -1,6 +1,5 @@
 import type { CanvasFormat, CanvasItem, DetailSize, PaletteId } from './types';
 import { FORMATS, OBJECT_CATALOG } from './types';
-import rawObjects from './data/objects.json';
 
 export interface AICompositionResult {
   title: string;
@@ -19,62 +18,126 @@ export interface PresetTheme {
 
 export const PRESET_THEMES: PresetTheme[] = [
   {
-    title: 'Музыка и отдых',
-    description: 'Наушники на первом плане и ваза с цветами в фоне (эталон студии)',
-    prompt: 'музыка звук аудио подкаст релакс отдых плейлист вайб',
-    palette: 'purple'
-  },
-  {
-    title: 'Конспекты и продуктивность',
-    description: 'Открытый блокнот, смартфон на странице и ручка перед закладкой',
-    prompt: 'конспекты учеба продуктивность блокнот лекции знания фокус',
+    title: 'Журналистика и писательство',
+    description: 'Открытый блокнот, настольная лампа в фоне и ручка перед разворотом (референс студии)',
+    prompt: 'журналистика автор статья текст репортаж рукопись писательство',
     palette: 'purple'
   },
   {
     title: 'Личные финансы и бюджет',
-    description: 'Кожаный кошелек, папка документов и монета на переднем плане',
-    prompt: 'финансы деньги кошелек бюджет сбережения банк инвестиции',
+    description: 'Кожаный кошелек, монета на переднем плане и фоновая лампа (эталон студии)',
+    prompt: 'личные финансы деньги кошелек бюджет инвестиции сбережения',
     palette: 'peach'
+  },
+  {
+    title: 'Конспекты и IT-продуктивность',
+    description: 'Открытый блокнот, смартфон на развороте и фоновая лампа',
+    prompt: 'конспекты учеба продуктивность фокус приложение мобилка',
+    palette: 'peach'
+  },
+  {
+    title: 'Музыка и отдых',
+    description: 'Наушники на первом плане и ваза с цветами в фоне (эталон студии)',
+    prompt: 'музыка отдых релакс треки подкаст ваза цветы звук',
+    palette: 'mint'
   },
   {
     title: 'IT-стартап и продукт',
     description: 'Смартфон с мобильным приложением и пазлы сборки архитектуры',
-    prompt: 'стартап технологии приложение код сборка пазл команда разработка',
+    prompt: 'стартап технологии приложение код сборка пазл разработка',
     palette: 'mint'
   },
   {
-    title: 'Рабочее пространство',
-    description: 'Настольная лампа в фоне, открытый блокнот и ручка для подписи',
-    prompt: 'рабочее место офис организация лампа документы отчет порядок',
+    title: 'Рабочее пространство и документы',
+    description: 'Папка документов, ручка для подписи и настольная лампа в фоне',
+    prompt: 'документы папка договор подпись работа офис регламент',
     palette: 'purple'
   }
 ];
 
-// Map asset dimensions for boundary calculations
-const assetDimensions: Record<string, { w: number; h: number }> = {};
-for (const obj of rawObjects as { id: string; w: number; h: number }[]) {
-  assetDimensions[obj.id] = { w: obj.w, h: obj.h };
-}
-
 /**
- * Natural pairings from studio design guidelines:
- * Guarantees every single subject always has an aesthetically harmonious
- * background companion and/or foreground detail (2 to 3 objects total).
+ * Natural companion pairings for each primary object when fewer than 3 objects are matched.
+ * Strictly adheres to Studio Ochen's reference compositions.
  */
-const NATURAL_COMPANIONS: Record<string, { bg: string; accent: string }> = {
+export const NATURAL_COMPANIONS: Record<string, { bg: string; accent: string }> = {
   notebook: { bg: 'lamp', accent: 'pen' },
-  phone: { bg: 'flowers', accent: 'puzzle' },
+  wallet: { bg: 'lamp', accent: 'coin' },
+  phone: { bg: 'lamp', accent: 'puzzle' },
   headphones: { bg: 'flowers', accent: 'puzzle' },
-  wallet: { bg: 'folder', accent: 'coin' },
-  folder: { bg: 'lamp', accent: 'wallet' },
+  folder: { bg: 'lamp', accent: 'pen' },
   lamp: { bg: 'folder', accent: 'pen' },
-  flowers: { bg: 'folder', accent: 'headphones' },
-  puzzle: { bg: 'flowers', accent: 'phone' },
-  coin: { bg: 'folder', accent: 'wallet' },
+  flowers: { bg: 'lamp', accent: 'puzzle' },
   pen: { bg: 'lamp', accent: 'notebook' },
+  coin: { bg: 'lamp', accent: 'wallet' },
+  puzzle: { bg: 'flowers', accent: 'phone' }
 };
 
-// Deterministic string hash
+/**
+ * Rich Russian & English semantic keyword map with broad root-stem coverage.
+ */
+const RICH_SEMANTIC_KEYWORDS: Record<string, string[]> = {
+  notebook: [
+    'журнал', 'писател', 'автор', 'книг', 'блокнот', 'конспект', 'стать', 'текст',
+    'заметк', 'рукопис', 'чтени', 'библиот', 'учеб', 'лекци', 'диплом', 'реферат',
+    'дневник', 'сценар', 'публикац', 'литератур', 'тетрад', 'запис', 'копирайт',
+    'редактор', 'пресса', 'медиа', 'издательств', 'поэзи', 'стих', 'эссе', 'книжк',
+    'book', 'notebook', 'notes', 'write', 'author', 'article', 'essay', 'journal'
+  ],
+  pen: [
+    'ручк', 'стилус', 'подпис', 'автограф', 'писат', 'чернил', 'перо', 'договор',
+    'контракт', 'соглашен', 'бланк', 'роспис', 'канцеляр', 'карандаш',
+    'pen', 'pencil', 'stylus', 'signature', 'sign', 'ink'
+  ],
+  phone: [
+    'телефон', 'смартфон', 'айфон', 'мобил', 'приложен', 'звонок', 'чат', 'мессенджер',
+    'экран', 'интерфейс', 'девайс', 'связ', 'гаджет', 'соцсет',
+    'ios', 'android', 'app', 'ui', 'ux', 'phone', 'mobile', 'screen', 'device'
+  ],
+  puzzle: [
+    'пазл', 'архитектур', 'модул', 'компонент', 'логик', 'алгоритм', 'стратеги',
+    'иде', 'сборк', 'решен', 'задач', 'структур', 'концепт', 'схем', 'систем',
+    'интеграц', 'кусоч', 'пазлы', 'головоломк', 'составн', 'конструктор',
+    'puzzle', 'logic', 'architecture', 'module', 'component', 'piece'
+  ],
+  wallet: [
+    'кошелек', 'деньг', 'финанс', 'бюджет', 'оплат', 'счет', 'наличн', 'зарплат',
+    'доход', 'расход', 'эконом', 'портмоне', 'трат', 'карт', 'банк', 'платеж',
+    'капитал', 'сбережен', 'деньж', 'рубл', 'доллар', 'евро', 'кеш', 'валют',
+    'wallet', 'money', 'finance', 'budget', 'cash', 'payment', 'salary', 'wealth'
+  ],
+  coin: [
+    'монет', 'крипт', 'биткоин', 'токен', 'инвестиц', 'процент', 'вклад', 'сейф',
+    'защит', 'безопасн', 'замок', 'криптовалют', 'блокчейн', 'накоплен', 'копейк',
+    'coin', 'crypto', 'token', 'bitcoin', 'investment', 'savings', 'lock', 'security'
+  ],
+  headphones: [
+    'наушник', 'музык', 'звук', 'аудио', 'подкаст', 'трек', 'ритм', 'бит', 'релакс',
+    'отдых', 'фокус', 'концентрац', 'тишин', 'мелоди', 'плейлист', 'слушат', 'акустик',
+    'гарнитур', 'песн', 'вокал', 'радио', 'голос',
+    'headphones', 'music', 'sound', 'audio', 'podcast', 'beats', 'track', 'relax'
+  ],
+  lamp: [
+    'ламп', 'свет', 'освещен', 'рабоч', 'стол', 'вечер', 'уют', 'кабинет', 'деск',
+    'дизайн', 'светильник', 'ночник', 'комнат', 'рабочее мест', 'офис',
+    'lamp', 'light', 'desk', 'workspace', 'evening', 'cozy', 'interior'
+  ],
+  flowers: [
+    'цвет', 'ваз', 'тюльпан', 'букет', 'флористик', 'весн', 'природ', 'красот',
+    'подарок', 'праздник', 'настроен', 'декор', 'уют', 'жизн', 'любов', 'эстетик',
+    'растени', 'комнатн', 'зелен', 'лепест',
+    'flowers', 'vase', 'bouquet', 'tulips', 'spring', 'gift', 'nature', 'beauty'
+  ],
+  folder: [
+    'папк', 'документ', 'бумаг', 'дело', 'отчет', 'архив', 'файл', 'проект',
+    'документац', 'бухгалтер', 'юриспруденц', 'прав', 'закон', 'регламент', 'досье',
+    'делопроизводств', 'папка с файл', 'канцеляри',
+    'folder', 'document', 'documents', 'archive', 'report', 'files', 'legal', 'case'
+  ]
+};
+
+/**
+ * Deterministic string hash for consistent results.
+ */
 function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -85,79 +148,249 @@ function hashString(str: string): number {
 }
 
 /**
- * Automatically fits and centers all items within the canvas safe bounds,
- * preserving exact relative proportions and preventing any clipping across all formats.
+ * Adjusts all items when the canvas format changes to ensure they remain centered and contained.
  */
 export function fitAndCenterScene(
   items: CanvasItem[],
   format: CanvasFormat,
-  margin: number = 50
+  padding: number = 50
 ): CanvasItem[] {
   if (items.length === 0) return items;
   const cfg = FORMATS[format];
   const W = cfg.width;
   const H = cfg.height;
-  const cx = W / 2;
-  const cy = H / 2;
 
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
+  const minX = Math.min(...items.map(it => it.x));
+  const maxX = Math.max(...items.map(it => it.x));
+  const minY = Math.min(...items.map(it => it.y));
+  const maxY = Math.max(...items.map(it => it.y));
 
-  for (const it of items) {
-    const assetId = `${it.objectType}-${it.size}-${it.state}`;
-    const dims = assetDimensions[assetId] || { w: 500, h: 400 };
-    const w = dims.w * it.scale;
-    const h = dims.h * it.scale;
-    minX = Math.min(minX, it.x - w / 2);
-    minY = Math.min(minY, it.y - h / 2);
-    maxX = Math.max(maxX, it.x + w / 2);
-    maxY = Math.max(maxY, it.y + h / 2);
-  }
+  const curW = maxX - minX || 100;
+  const curH = maxY - minY || 100;
+  const curCx = (minX + maxX) / 2;
+  const curCy = (minY + maxY) / 2;
 
-  const totalW = maxX - minX;
-  const totalH = maxY - minY;
-  const maxAllowedW = W - 2 * margin;
-  const maxAllowedH = H - 2 * margin;
-
-  let scaleFactor = 1.0;
-  if (totalW > maxAllowedW || totalH > maxAllowedH) {
-    scaleFactor = Math.min(maxAllowedW / totalW, maxAllowedH / totalH);
-  }
-
-  const compCenterX = (minX + maxX) / 2;
-  const compCenterY = (minY + maxY) / 2;
+  const targetW = W - padding * 2;
+  const targetH = H - padding * 2;
+  const scaleRatio = Math.min(1.0, targetW / curW, targetH / curH);
 
   return items.map(it => ({
     ...it,
-    scale: Math.round(it.scale * scaleFactor * 1000) / 1000,
-    x: Math.round(cx + (it.x - compCenterX) * scaleFactor),
-    y: Math.round(cy + (it.y - compCenterY) * scaleFactor),
+    x: Math.round(W / 2 + (it.x - curCx) * scaleRatio),
+    y: Math.round(H / 2 + (it.y - curCy) * scaleRatio),
+    scale: Number((it.scale * scaleRatio).toFixed(4))
   }));
 }
 
 /**
- * Returns the canonical detail size (L or S) to guarantee real-world desk proportions.
- * Prevents folders or notebooks from towering over desk lamps.
+ * Computes tight, balanced isometric anchor coordinates for the group
+ * ensuring exact relative proportions and zero clipping.
  */
-function getCanonicalDetailSize(objectType: string, isHero: boolean, hasCompanion: boolean): DetailSize {
-  // Items that are wide/tall in L must use S in multi-object compositions to match studio proportions
-  if (objectType === 'folder') return 'S';
-  if (objectType === 'notebook') return 'S';
-  if (objectType === 'lamp') return 'S';
-  if (objectType === 'flowers') return 'S';
-  if (objectType === 'pen') return 'S';
+export function buildIsometricScene(
+  heroKey: string,
+  bgKey: string | null,
+  accentKey: string | null,
+  format: CanvasFormat,
+  detailSize: DetailSize = 'L'
+): CanvasItem[] {
+  const formatConfig = FORMATS[format];
+  const W = formatConfig.width;
+  const H = formatConfig.height;
 
-  if (objectType === 'phone') {
-    return isHero && !hasCompanion ? 'L' : (isHero ? 'L' : 'S');
+  // Canonical base dimensions from user's authentic SVGs
+  const DIMS: Record<string, { w: number; h: number }> = {
+    notebook: { w: 1446, h: 977 },
+    folder: { w: 1241, h: 659 },
+    lamp: { w: 946, h: 1129 },
+    headphones: { w: 889, h: 692 },
+    flowers: { w: 591, h: 748 },
+    phone: { w: 797, h: 462 },
+    wallet: { w: 631, h: 397 },
+    puzzle: { w: 545, h: 314 },
+    pen: { w: 509, h: 286 },
+    coin: { w: 287, h: 189 }
+  };
+
+  // Base offsets relative to Hero center (0, 0) on the 30-degree isometric plane
+  let bgOffset = { x: -260, y: -220 };
+  let accentOffset = { x: 0, y: 0 };
+  let accentRot = 0;
+
+  if (heroKey === 'notebook') {
+    // User Mockup Image 2: Pen lying right along notebook's bottom-left edge!
+    if (accentKey === 'pen') {
+      accentOffset = { x: -180, y: 240 };
+      accentRot = 0;
+    } else if (accentKey === 'phone') {
+      // Phone sits on the right page
+      accentOffset = { x: 120, y: -50 };
+    } else if (accentKey === 'puzzle') {
+      accentOffset = { x: 100, y: 50 };
+    }
+
+    if (bgKey === 'lamp') {
+      // User Mockup Image 2: Lamp stands behind the book to the top-left
+      bgOffset = { x: -320, y: -240 };
+    } else if (bgKey === 'flowers') {
+      bgOffset = { x: 320, y: -220 };
+    } else if (bgKey === 'folder') {
+      bgOffset = { x: -280, y: -220 };
+    }
+  } else if (heroKey === 'wallet') {
+    // Studio Reference Image 3: Coin placed on desk to the right along 30 deg line
+    if (accentKey === 'coin') {
+      accentOffset = { x: 230, y: -120 };
+    } else if (accentKey === 'pen') {
+      accentOffset = { x: -160, y: 180 };
+    }
+
+    if (bgKey === 'lamp') {
+      // Studio Reference Image 3: Lamp stands behind wallet
+      bgOffset = { x: -160, y: -220 };
+    } else if (bgKey === 'folder') {
+      bgOffset = { x: -140, y: -220 };
+    }
+  } else if (heroKey === 'phone') {
+    if (accentKey === 'puzzle') {
+      // Puzzle rests directly on phone screen
+      accentOffset = { x: 10, y: -10 };
+    } else if (accentKey === 'coin') {
+      accentOffset = { x: 200, y: 80 };
+    }
+
+    if (bgKey === 'lamp') {
+      bgOffset = { x: 260, y: -80 };
+    } else if (bgKey === 'flowers') {
+      bgOffset = { x: 0, y: -260 };
+    } else if (bgKey === 'folder') {
+      bgOffset = { x: -200, y: -180 };
+    }
+  } else if (heroKey === 'headphones') {
+    if (accentKey === 'puzzle') {
+      accentOffset = { x: 40, y: 150 };
+    } else if (accentKey === 'pen') {
+      accentOffset = { x: 220, y: 130 };
+    }
+
+    if (bgKey === 'lamp') {
+      bgOffset = { x: 280, y: -120 };
+    } else if (bgKey === 'flowers') {
+      bgOffset = { x: 0, y: -250 };
+    }
+  } else if (heroKey === 'folder') {
+    if (accentKey === 'pen') {
+      accentOffset = { x: -140, y: 220 };
+    } else if (accentKey === 'coin') {
+      accentOffset = { x: 220, y: 120 };
+    }
+
+    if (bgKey === 'lamp') {
+      bgOffset = { x: -280, y: -220 };
+    } else if (bgKey === 'flowers') {
+      bgOffset = { x: 280, y: -200 };
+    }
   }
-  if (objectType === 'wallet') return 'L';
-  if (objectType === 'headphones') return 'L';
-  if (objectType === 'coin') return 'L';
-  if (objectType === 'puzzle') return isHero ? 'L' : 'S';
 
-  return 'S';
+  const rawPlaced: Array<{
+    type: string;
+    x: number;
+    y: number;
+    rot: number;
+    state: 'main' | 'bg';
+    w: number;
+    h: number;
+    zIndex: number;
+  }> = [];
+
+  // Background Item (zIndex 1)
+  if (bgKey && DIMS[bgKey]) {
+    rawPlaced.push({
+      type: bgKey,
+      x: bgOffset.x,
+      y: bgOffset.y,
+      rot: 0,
+      state: 'bg',
+      w: DIMS[bgKey].w,
+      h: DIMS[bgKey].h,
+      zIndex: 1
+    });
+  }
+
+  // Hero Item (zIndex 2)
+  if (DIMS[heroKey]) {
+    rawPlaced.push({
+      type: heroKey,
+      x: 0,
+      y: 0,
+      rot: 0,
+      state: 'main',
+      w: DIMS[heroKey].w,
+      h: DIMS[heroKey].h,
+      zIndex: 2
+    });
+  }
+
+  // Accent Item (zIndex 3)
+  if (accentKey && DIMS[accentKey]) {
+    rawPlaced.push({
+      type: accentKey,
+      x: accentOffset.x,
+      y: accentOffset.y,
+      rot: accentRot,
+      state: 'main',
+      w: DIMS[accentKey].w,
+      h: DIMS[accentKey].h,
+      zIndex: 3
+    });
+  }
+
+  // Calculate group bounding box
+  const minX = Math.min(...rawPlaced.map(it => it.x - it.w / 2));
+  const maxX = Math.max(...rawPlaced.map(it => it.x + it.w / 2));
+  const minY = Math.min(...rawPlaced.map(it => it.y - it.h / 2));
+  const maxY = Math.max(...rawPlaced.map(it => it.y + it.h / 2));
+
+  const grpW = maxX - minX;
+  const grpH = maxY - minY;
+  const grpCx = (minX + maxX) / 2;
+  const grpCy = (minY + maxY) / 2;
+
+  // Scale target depending on canvas format
+  let targetCoverage = 0.72;
+  if (format === '16:9') targetCoverage = 0.68;
+  if (format === '9:16') targetCoverage = 0.70;
+
+  const targetW = W * targetCoverage;
+  const targetH = H * targetCoverage;
+
+  // All objects share the EXACT same scale factor to preserve 100% relative proportions!
+  let groupScale = Math.min(targetW / grpW, targetH / grpH);
+
+  // When Size S is selected, use 1.0 (Size S assets have w/h already divided by 2)
+  if (detailSize === 'S') {
+    groupScale *= 2.0; // Because Size S assets are 50% smaller in objects.json
+  }
+
+  const now = Date.now();
+  const finalItems: CanvasItem[] = rawPlaced.map((it, idx) => {
+    // Center of canvas
+    const finalX = Math.round(W / 2 + (it.x - grpCx) * (detailSize === 'S' ? groupScale * 0.5 : groupScale));
+    const finalY = Math.round(H / 2 + (it.y - grpCy) * (detailSize === 'S' ? groupScale * 0.5 : groupScale));
+
+    return {
+      id: `${it.type}-${it.state}-${now}-${idx}`,
+      objectType: it.type,
+      size: detailSize,
+      state: it.state,
+      x: finalX,
+      y: finalY,
+      scale: Number(groupScale.toFixed(4)),
+      rotation: it.rot,
+      zIndex: it.zIndex
+    };
+  });
+
+  return finalItems;
 }
 
 /**
@@ -167,27 +400,29 @@ function getCanonicalDetailSize(objectType: string, isHero: boolean, hasCompanio
 export function generateCompositionFromPrompt(
   prompt: string,
   format: CanvasFormat,
-  _detailSize: DetailSize = 'L'
+  detailSize: DetailSize = 'L'
 ): AICompositionResult {
   const pLower = prompt.toLowerCase().trim();
 
-  // 1. Semantic scoring across all 10 library objects
+  // 1. Semantic scoring across all 10 library objects with rich stem dictionary
   const scores: Record<string, { score: number; matchedWords: string[] }> = {};
-  for (const [key, meta] of Object.entries(OBJECT_CATALOG)) {
+
+  for (const [key, stems] of Object.entries(RICH_SEMANTIC_KEYWORDS)) {
     scores[key] = { score: 0, matchedWords: [] };
 
     // Check direct object name or Russian label
-    if (pLower.includes(key) || pLower.includes(meta.labelRu.toLowerCase())) {
-      scores[key].score += 20;
-      scores[key].matchedWords.push(meta.labelRu);
+    const meta = OBJECT_CATALOG[key];
+    if (pLower.includes(key) || (meta && pLower.includes(meta.labelRu.toLowerCase()))) {
+      scores[key].score += 25;
+      scores[key].matchedWords.push(meta?.labelRu || key);
     }
 
-    // Check tags / stems
-    for (const tag of meta.tags) {
-      if (pLower.includes(tag)) {
-        scores[key].score += 8;
-        if (!scores[key].matchedWords.includes(tag)) {
-          scores[key].matchedWords.push(tag);
+    // Check rich stems
+    for (const stem of stems) {
+      if (pLower.includes(stem)) {
+        scores[key].score += 10;
+        if (!scores[key].matchedWords.includes(stem)) {
+          scores[key].matchedWords.push(stem);
         }
       }
     }
@@ -206,13 +441,9 @@ export function generateCompositionFromPrompt(
   if (matched.length > 0) {
     const matchedKeys = matched.map(([k]) => k);
 
-    // If lamp, flowers, or folder is matched with a primary subject, it should be background!
-    const hasLamp = matchedKeys.includes('lamp');
-    const hasFlowers = matchedKeys.includes('flowers');
-    const hasFolder = matchedKeys.includes('folder');
-
+    // Primary candidates for hero role
     const primaryCandidates = matchedKeys.filter(k =>
-      ['notebook', 'headphones', 'wallet', 'phone'].includes(k)
+      ['notebook', 'wallet', 'phone', 'headphones', 'folder'].includes(k)
     );
 
     if (primaryCandidates.length > 0) {
@@ -222,6 +453,10 @@ export function generateCompositionFromPrompt(
     }
 
     // Assign background object
+    const hasLamp = matchedKeys.includes('lamp');
+    const hasFlowers = matchedKeys.includes('flowers');
+    const hasFolder = matchedKeys.includes('folder');
+
     if (hasLamp && heroKey !== 'lamp') {
       bgKey = 'lamp';
     } else if (hasFlowers && heroKey !== 'flowers') {
@@ -245,25 +480,25 @@ export function generateCompositionFromPrompt(
       accentKey = 'phone';
     }
 
-    // GUARANTEE: Never only 1 object! Always 2 to 3 objects!
+    // GUARANTEE: Always 2 to 3 objects via natural companion pairings!
     if (!bgKey && !accentKey) {
-      const companions = NATURAL_COMPANIONS[heroKey] || { bg: 'flowers', accent: 'puzzle' };
+      const companions = NATURAL_COMPANIONS[heroKey] || { bg: 'lamp', accent: 'pen' };
       bgKey = companions.bg;
       accentKey = companions.accent;
     } else if (!bgKey) {
-      const companions = NATURAL_COMPANIONS[heroKey] || { bg: 'flowers', accent: 'puzzle' };
+      const companions = NATURAL_COMPANIONS[heroKey] || { bg: 'lamp', accent: 'pen' };
       bgKey = companions.bg;
     }
   } else {
-    // Novel / unknown prompt: use deterministic hash to select distinct harmonious presets
+    // Unknown or abstract prompt: categorize intelligently
     const hash = hashString(pLower || 'default');
-    const presets = [
-      { hero: 'headphones', bg: 'flowers', accent: 'puzzle' },
-      { hero: 'notebook', bg: 'lamp', accent: 'pen' },
-      { hero: 'wallet', bg: 'folder', accent: 'coin' },
-      { hero: 'phone', bg: 'flowers', accent: 'puzzle' },
+    const defaultPresets = [
+      { hero: 'notebook', bg: 'lamp', accent: 'pen' },    // Writing & desk (Universal fallback!)
+      { hero: 'wallet', bg: 'lamp', accent: 'coin' },      // Finance & commerce
+      { hero: 'phone', bg: 'lamp', accent: 'puzzle' },     // Tech & digital
+      { hero: 'headphones', bg: 'flowers', accent: 'puzzle' } // Creative & audio
     ];
-    const picked = presets[hash % presets.length];
+    const picked = defaultPresets[hash % defaultPresets.length];
     heroKey = picked.hero;
     bgKey = picked.bg;
     accentKey = picked.accent;
@@ -272,146 +507,47 @@ export function generateCompositionFromPrompt(
   // Determine palette dynamically
   let recPalette: PaletteId = 'purple';
   if (
-    pLower.includes('деньги') ||
+    pLower.includes('персик') ||
+    pLower.includes('тепл') ||
+    pLower.includes('деньг') ||
     pLower.includes('финанс') ||
     pLower.includes('банк') ||
-    pLower.includes('бюджет') ||
-    pLower.includes('кошелек') ||
+    pLower.includes('кошел') ||
     pLower.includes('инвест') ||
-    pLower.includes('монет') ||
-    pLower.includes('золот') ||
-    pLower.includes('тепл') ||
-    pLower.includes('персик') ||
-    heroKey === 'wallet' ||
-    heroKey === 'coin'
+    heroKey === 'wallet'
   ) {
     recPalette = 'peach';
   } else if (
-    pLower.includes('стартап') ||
-    pLower.includes('технолог') ||
-    pLower.includes('приложен') ||
-    pLower.includes('код') ||
-    pLower.includes('сборк') ||
-    pLower.includes('пазл') ||
-    pLower.includes('свеж') ||
     pLower.includes('мят') ||
-    pLower.includes('природ') ||
-    heroKey === 'puzzle'
+    pLower.includes('свеж') ||
+    pLower.includes('технолог') ||
+    pLower.includes('стартап') ||
+    pLower.includes('код') ||
+    pLower.includes('музык') ||
+    pLower.includes('звук') ||
+    pLower.includes('аудио') ||
+    heroKey === 'headphones'
   ) {
     recPalette = 'mint';
   }
 
-  // 2. Spatial distribution coordinates matching the studio reference cards
-  const rawItems: CanvasItem[] = [];
-  const now = Date.now();
+  // Build the aligned isometric scene
+  const finalItems = buildIsometricScene(heroKey, bgKey, accentKey, format, detailSize);
 
-  let bgX = 350;
-  let bgY = 250;
-  let heroX = 520;
-  let heroY = 650;
-  let accX = 480;
-  let accY = 770;
-
-  if (format === '1:1') {
-    // Exact 1:1 distribution: Upper half (y ~ 220..270), Lower half (y ~ 640..680)
-    if (bgKey === 'lamp') { bgX = 310; bgY = 270; }
-    else if (bgKey === 'flowers') { bgX = 520; bgY = 230; }
-    else if (bgKey === 'folder') { bgX = 370; bgY = 220; }
-    else if (bgKey === 'puzzle') { bgX = 460; bgY = 290; }
-
-    if (heroKey === 'headphones') { heroX = 530; heroY = 670; }
-    else if (heroKey === 'phone') { heroX = 500; heroY = 680; }
-    else if (heroKey === 'wallet') { heroX = 460; heroY = 680; }
-    else if (heroKey === 'notebook') { heroX = 540; heroY = 580; }
-    else if (heroKey === 'folder') { heroX = 540; heroY = 660; }
-
-    if (accentKey === 'pen') { accX = 280; accY = 750; }
-    else if (accentKey === 'coin') { accX = 640; accY = 730; }
-    else if (heroKey === 'notebook' && accentKey === 'phone') { accX = 650; accY = 480; }
-  } else if (format === '16:9') {
-    // 16:9 Banner distribution: Left side (x ~ 340), Right side (x ~ 720), Front (x ~ 620)
-    bgX = 340; bgY = 260;
-    heroX = 720; heroY = 390;
-    accX = 620; accY = 530;
-    if (heroKey === 'notebook' && accentKey === 'phone') { accX = 810; accY = 360; }
-  } else if (format === '9:16') {
-    // 9:16 Stories distribution: Upper third (y ~ 340), Middle third (y ~ 690), Lower third (y ~ 940)
-    bgX = 338; bgY = 340;
-    heroX = 338; heroY = 690;
-    accX = 338; accY = 940;
-    if (heroKey === 'notebook' && accentKey === 'phone') { accX = 420; accY = 660; }
-  } else {
-    // 4:3 Card distribution
-    bgX = 340; bgY = 250;
-    heroX = 640; heroY = 460;
-    accX = 550; accY = 600;
-    if (heroKey === 'notebook' && accentKey === 'phone') { accX = 720; accY = 430; }
-  }
-
-  // 1. Background Item
-  if (bgKey) {
-    const bgSize = getCanonicalDetailSize(bgKey, false, true);
-    rawItems.push({
-      id: `item-${now}-bg`,
-      objectType: bgKey,
-      size: bgSize,
-      state: 'bg',
-      x: bgX,
-      y: bgY,
-      scale: 0.95,
-      rotation: 0,
-      zIndex: 5
-    });
-  }
-
-  // 2. Hero Item
-  const heroSize = getCanonicalDetailSize(heroKey, true, Boolean(bgKey || accentKey));
-  rawItems.push({
-    id: `item-${now}-hero`,
-    objectType: heroKey,
-    size: heroSize,
-    state: 'main',
-    x: heroX,
-    y: heroY,
-    scale: 0.95,
-    rotation: 0,
-    zIndex: 20
-  });
-
-  // 3. Accent Item
-  if (accentKey) {
-    const accSize = accentKey === 'phone' ? 'S' : getCanonicalDetailSize(accentKey, false, true);
-    rawItems.push({
-      id: `item-${now}-accent`,
-      objectType: accentKey,
-      size: accSize,
-      state: 'main',
-      x: accX,
-      y: accY,
-      scale: 0.95,
-      rotation: 0,
-      zIndex: 30
-    });
-  }
-
-  // 4. Auto-fit and center: guarantees safe 50px padding from all canvas borders
-  const finalItems = fitAndCenterScene(rawItems, format, 50);
-
-  // Construct transparent rationale
   const heroLabel = OBJECT_CATALOG[heroKey]?.labelRu || heroKey;
   const bgLabel = bgKey ? OBJECT_CATALOG[bgKey]?.labelRu : null;
   const accentLabel = accentKey ? OBJECT_CATALOG[accentKey]?.labelRu : null;
 
   let rationaleText = '';
   if (allDetectedTags.length > 0) {
-    rationaleText = `Выделены ключевые понятия: «${allDetectedTags.slice(0, 4).join(', ')}». `;
+    rationaleText = `Смысловые теги: <${allDetectedTags.slice(0, 4).join(', ')}>. `;
   }
-  rationaleText += `Главный объект: ${heroLabel} (полноцветный фокус сцены).`;
+  rationaleText += `Главный объект: ${heroLabel} (фокус сцены).`;
   if (bgLabel) {
-    rationaleText += ` В глубине добавлен фон: ${bgLabel} (монохром в тоне палитры).`;
+    rationaleText += ` В глубине: ${bgLabel} (монохром в тоне палитры).`;
   }
   if (accentLabel) {
-    rationaleText += ` Добавлена деталь: ${accentLabel}.`;
+    rationaleText += ` Добавлен акцент: ${accentLabel}.`;
   }
 
   return {
@@ -429,16 +565,16 @@ export function generateCompositionFromPrompt(
 export function generateCompositionFromComponents(
   componentNames: string[],
   format: CanvasFormat,
-  _detailSize: DetailSize = 'L'
+  detailSize: DetailSize = 'L'
 ): CanvasItem[] {
   const validKeys = componentNames.filter(name => OBJECT_CATALOG[name]);
   if (validKeys.length === 0) return [];
 
-  // If 1 item selected: automatically pair it with a natural companion (2 items total)
+  // If 1 item selected: automatically pair it with a natural companion (2-3 items total)
   if (validKeys.length === 1) {
     const hero = validKeys[0];
-    const companions = NATURAL_COMPANIONS[hero] || { bg: 'flowers', accent: 'puzzle' };
-    return generateCompositionFromPrompt(hero + ' ' + companions.bg, format).items;
+    const companions = NATURAL_COMPANIONS[hero] || { bg: 'lamp', accent: 'pen' };
+    return buildIsometricScene(hero, companions.bg, companions.accent, format, detailSize);
   }
 
   // If 2 items selected: 1 Background + 1 Hero
@@ -447,14 +583,14 @@ export function generateCompositionFromComponents(
     const isFirstBg = bgTypes.includes(validKeys[0]) && !bgTypes.includes(validKeys[1]);
     const bg = isFirstBg ? validKeys[0] : validKeys[1];
     const hero = isFirstBg ? validKeys[1] : validKeys[0];
-    return generateCompositionFromPrompt(`${hero} фоновая ${bg}`, format).items;
+    return buildIsometricScene(hero, bg, null, format, detailSize);
   }
 
   // If 3+ items: Keep 3 items (Hero, Background, Accent)
   const bgTypes = ['lamp', 'flowers', 'folder'];
   const bgCandidate = validKeys.find(k => bgTypes.includes(k)) || validKeys[1];
-  const accentCandidate = validKeys.find(k => ['coin', 'pen', 'puzzle'].includes(k) && k !== bgCandidate) || validKeys[2];
+  const accentCandidate = validKeys.find(k => ['coin', 'pen', 'puzzle', 'phone'].includes(k) && k !== bgCandidate) || validKeys[2];
   const heroCandidate = validKeys.find(k => k !== bgCandidate && k !== accentCandidate) || validKeys[0];
 
-  return generateCompositionFromPrompt(`${heroCandidate} фоновая ${bgCandidate} ${accentCandidate}`, format).items;
+  return buildIsometricScene(heroCandidate, bgCandidate, accentCandidate, format, detailSize);
 }

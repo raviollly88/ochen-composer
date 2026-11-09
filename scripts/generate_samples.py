@@ -1,237 +1,166 @@
-import json
 import os
-import pymupdf
+import sys
+import json
+import fitz
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_FILE = os.path.join(ROOT, "src", "data", "objects.json")
-OUT_DIR = os.path.join(ROOT, "public", "samples")
+sys.path.append(os.getcwd())
 
-with open(DATA_FILE, "r", encoding="utf-8") as f:
-    raw_objects = json.load(f)
+# Ensure output directory exists
+samples_dir = 'ochen-composer/public/samples'
+os.makedirs(samples_dir, exist_ok=True)
 
-asset_map = {obj["id"]: obj for obj in raw_objects}
+with open('parsed_user_svgs.json', 'r', encoding='utf-8') as f:
+    library = json.load(f)
+
+from test_composer_engine import compose_scene
 
 PALETTES = {
-    "purple": {
-        "id": "purple",
-        "name": "Purple Mist",
-        "bgPrimary": "#d6cdf4",
-        "bgMedium": "#aa9aef",
-        "bgDark": "#7764d6",
-        "accentYellow": "#f9ebaf",
-        "accentCoral": "#f9a3aa",
-        "accentPale": "#ffe2e1",
+    'purple': {
+        'bgPrimary': '#d6cdf4',
+        'bgDark': '#7764d6',
+        'accentYellow': '#f9ebaf',
+        'accentCoral': '#f9a3aa',
+        'accentPale': '#ffe2e1'
     },
-    "peach": {
-        "id": "peach",
-        "name": "Warm Peach",
-        "bgPrimary": "#fdd6b8",
-        "bgMedium": "#f9c895",
-        "bgDark": "#d17431",
-        "accentYellow": "#f9ebaf",
-        "accentCoral": "#80dada",
-        "accentPale": "#bdebeb",
+    'peach': {
+        'bgPrimary': '#fdd6b8',
+        'bgDark': '#d17431',
+        'accentYellow': '#f9ebaf',
+        'accentCoral': '#80dada',
+        'accentPale': '#bdebeb'
     },
-    "mint": {
-        "id": "mint",
-        "name": "Fresh Mint",
-        "bgPrimary": "#bdeaea",
-        "bgMedium": "#7fdada",
-        "bgDark": "#59bdbd",
-        "accentYellow": "#ffd3f1",
-        "accentCoral": "#6d7bfb",
-        "accentPale": "#b6c6fd",
+    'mint': {
+        'bgPrimary': '#bdeaea',
+        'bgDark': '#59bdbd',
+        'accentYellow': '#ffd3f1',
+        'accentCoral': '#6d7bfb',
+        'accentPale': '#b6c6fd'
     }
 }
 
-FORMATS = {
-    "16:9": {"width": 1200, "height": 675},
-    "1:1": {"width": 1000, "height": 1000},
-    "9:16": {"width": 675, "height": 1200},
-    "4:3": {"width": 1000, "height": 750}
-}
-
-def auto_fit_scene(items, W, H, margin=50):
-    min_x, min_y, max_x, max_y = 1e9, 1e9, -1e9, -1e9
-    for it in items:
-        asset_id = f"{it['objectType']}-{it['size']}-{it['state']}"
-        asset = asset_map[asset_id]
-        w = asset["w"] * it["scale"]
-        h = asset["h"] * it["scale"]
-        min_x = min(min_x, it["x"] - w / 2)
-        min_y = min(min_y, it["y"] - h / 2)
-        max_x = max(max_x, it["x"] + w / 2)
-        max_y = max(max_y, it["y"] + h / 2)
-
-    total_w = max_x - min_x
-    total_h = max_y - min_y
-    max_w = W - 2 * margin
-    max_h = H - 2 * margin
-
-    scale_factor = min(1.0, max_w / total_w if total_w > max_w else 1.0, max_h / total_h if total_h > max_h else 1.0)
-    comp_cx = (min_x + max_x) / 2
-    comp_cy = (min_y + max_y) / 2
-    target_cx = W / 2
-    target_cy = H / 2
-
-    fitted = []
-    for it in items:
-        new_scale = it["scale"] * scale_factor
-        new_x = target_cx + (it["x"] - comp_cx) * scale_factor
-        new_y = target_cy + (it["y"] - comp_cy) * scale_factor
-        fitted.append({**it, "x": new_x, "y": new_y, "scale": new_scale})
-
-    return fitted
-
-def adapt_color(fill, pal, is_mono):
-    if not fill:
-        return fill
+def adapt_color(fill, pal, is_bg):
+    if not fill or fill == 'none': return fill
     f = fill.lower()
-    if f in ("#181816", "#181817", "#000000", "#ffffff"):
+    if f in ['#181816', '#181817', '#000000', '#ffffff', 'white']:
+        if is_bg and f in ['#181816', '#181817', '#000000']:
+            return pal['bgDark']
         return fill
-    if is_mono:
-        if f in ("#d6cdf4", "#d7cdf5", "#fdd6b8", "#fdd7b9", "#bdeaea", "#beebeb", "#ffe2e1", "#bdebeb", "#b6c6fd", "#fce4a6", "#f9ebaf", "#f9ecb0"):
-            return pal["bgPrimary"]
-        if f in ("#aa9aef", "#aa9bf0", "#f9c895", "#fac896", "#7fdada", "#80dada", "#f9a3aa", "#f48c8c"):
-            return pal.get("bgMedium", pal["bgPrimary"])
-        return pal["bgDark"]
-
-    # Main color objects:
-    if f in ("#d6cdf4", "#d7cdf5", "#fdd6b8", "#fdd7b9", "#bdeaea", "#beebeb"):
-        return pal["bgPrimary"]
-    if f in ("#aa9aef", "#aa9bf0", "#f9c895", "#fac896", "#7fdada", "#80dada"):
-        return pal.get("bgMedium", pal["bgPrimary"])
-    if f in ("#7764d6", "#7864d7", "#d17431", "#d27532", "#59bdbd", "#5abebe"):
-        return pal["bgDark"]
-
-    # Object accents
-    if f in ("#f9ebaf", "#fce4a6", "#f9ecb0"):
-        return pal["accentYellow"]
-    if f in ("#f9a3aa", "#f48c8c", "#f28585", "#6d7bfb", "#80dada"):
-        return pal["accentCoral"]
-    if f in ("#ffe2e1", "#ffd4f2", "#ffd3f1", "#fbe6e6", "#fac8d4", "#bdebeb", "#b6c6fd"):
-        return pal["accentPale"]
-
+    if is_bg:
+        return pal['bgPrimary']
+    if f in ['#d7cdf5', '#d6cdf4', '#fdd6b8', '#bdeaea']:
+        return pal['bgPrimary']
+    if f in ['#7864d7', '#7764d6', '#d17431', '#59bdbd']:
+        return pal['bgDark']
+    if f in ['#f9ecb0', '#f9ebaf', '#fce4a6']:
+        return pal['accentYellow']
+    if f in ['#f9a3aa', '#f48c8c']:
+        return pal['accentCoral']
+    if f in ['#ffe3e1', '#ffe2e1', '#ffd4f2']:
+        return pal['accentPale']
     return fill
 
-def build_svg(items, format_key, palette_key, show_decor=True):
-    cfg = FORMATS[format_key]
-    pal = PALETTES[palette_key]
-    W = cfg["width"]
-    H = cfg["height"]
+def generate_sample(hero, bg, accent, format_wh, pal_id, svg_filename, png_filename):
+    W, H = format_wh
+    items, scale = compose_scene(hero, bg, accent, format_wh, pal_id)
+    pal = PALETTES[pal_id]
     cx = W / 2
     cy = H / 2
-    stroke_color = pal["bgDark"]
-
-    fitted_items = auto_fit_scene(items, W, H, margin=50)
-    sorted_items = sorted(fitted_items, key=lambda x: x.get("zIndex", 10))
-
-    line_span = min(360, W * 0.40)
-    ellipse_rx = min(90, W * 0.12)
-    ellipse_ry = ellipse_rx * 0.46
-
+    strokeColor = pal['bgDark']
+    
+    lineSpan = min(360, W * 0.38)
+    ellipseRx = min(90, W * 0.12)
+    ellipseRy = ellipseRx * 0.46
+    
     lines = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">',
-        '  <defs>',
-        '    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">',
-        '      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.10"/>',
-        '    </filter>',
-        '  </defs>',
-        f'  <rect width="{W}" height="{H}" rx="20" fill="{pal["bgPrimary"]}"/>'
+        f'  <defs>',
+        f'    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">',
+        f'      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.10"/>',
+        f'    </filter>',
+        f'  </defs>',
+        f'  <rect width="{W}" height="{H}" rx="24" fill="{pal["bgPrimary"]}"/>',
+        f'  <!-- Studio Ochen Decorative Scratches & Accents -->',
+        f'  <g id="background-decor">',
+        f'    <line x1="{cx - lineSpan}" y1="{cy + lineSpan * 0.22}" x2="{cx - lineSpan * 0.15}" y2="{cy - lineSpan * 0.28}" stroke="{strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>',
+        f'    <line x1="{cx - lineSpan * 0.70}" y1="{cy - lineSpan * 0.45}" x2="{cx - lineSpan * 0.40}" y2="{cy - lineSpan * 0.62}" stroke="{strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>',
+        f'    <line x1="{cx + lineSpan * 0.35}" y1="{cy + lineSpan * 0.45}" x2="{cx + lineSpan * 0.55}" y2="{cy + lineSpan * 0.33}" stroke="{strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>',
+        f'    <ellipse cx="{cx - 120}" cy="{cy - 50}" rx="{ellipseRx}" ry="{ellipseRy}" fill="{strokeColor}" opacity="0.12"/>',
+        f'    <!-- Signature Studio Corner Pills -->',
+        f'    <g transform="translate(65, {H - 65})">',
+        f'      <ellipse cx="20" cy="22" rx="28" ry="14" fill="{strokeColor}" opacity="0.65"/>',
+        f'      <ellipse cx="44" cy="10" rx="28" ry="14" fill="#ffffff" opacity="0.95"/>',
+        f'    </g>',
+        f'  </g>',
+        f'  <g id="composition-layer" filter="url(#card-shadow)">'
     ]
-
-    if show_decor:
-        lines.extend([
-            '  <!-- Studio Ochen Background Decorative Scratches & Accents -->',
-            '  <g id="background-decor">',
-            f'    <line x1="{cx - line_span}" y1="{cy + line_span * 0.22}" x2="{cx - line_span * 0.15}" y2="{cy - line_span * 0.28}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>',
-            f'    <line x1="{cx - line_span * 0.70}" y1="{cy - line_span * 0.45}" x2="{cx - line_span * 0.40}" y2="{cy - line_span * 0.62}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>',
-            f'    <line x1="{cx + line_span * 0.35}" y1="{cy + line_span * 0.45}" x2="{cx + line_span * 0.55}" y2="{cy + line_span * 0.33}" stroke="{stroke_color}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>',
-            f'    <ellipse cx="{cx - 120}" cy="{cy - 50}" rx="{ellipse_rx}" ry="{ellipse_ry}" fill="{stroke_color}" opacity="0.12"/>',
-            '    <!-- Signature Corner Pills -->',
-            f'    <g transform="translate(75, {H - 65})">',
-            f'      <ellipse cx="20" cy="22" rx="28" ry="14" fill="{stroke_color}" opacity="0.65"/>',
-            '      <ellipse cx="44" cy="10" rx="28" ry="14" fill="#ffffff" opacity="0.95"/>',
-            '    </g>',
-            '  </g>'
-        ])
-
-    lines.append('  <g id="composition" filter="url(#shadow)">')
-
-    for item in sorted_items:
-        asset_id = f"{item['objectType']}-{item['size']}-{item['state']}"
-        asset = asset_map.get(asset_id)
-        if not asset:
-            print(f"Warning: asset {asset_id} not found!")
-            continue
-
-        ox = asset["w"] / 2
-        oy = asset["h"] / 2
-
-        lines.append(f"    <!-- {item['objectType']} ({item['state']}) -->")
-        lines.append(f'    <g transform="translate({round(item["x"], 1)}, {round(item["y"], 1)}) rotate({item.get("rotation", 0)}) scale({round(item["scale"], 3)}) translate(-{ox}, -{oy})">')
-
-        is_mono = item["state"] == "bg"
-        for p in asset["paths"]:
-            fill = adapt_color(p.get("fill"), pal, is_mono)
-            eo = ' fill-rule="evenodd"' if p.get("eo") else ''
-            op = f' fill-opacity="{p["op"]}"' if p.get("op") and p["op"] < 1 else ''
-            lines.append(f'      <path d="{p["d"]}" fill="{fill}"{eo}{op}/>')
+    
+    items.sort(key=lambda it: it['zIndex'])
+    
+    for it in items:
+        asset = library[it['type']]
+        w = asset['w']
+        h = asset['h']
+        ox = w / 2
+        oy = h / 2
+        is_bg = (it['state'] == 'bg')
+        
+        lines.append(f'    <g transform="translate({it["x"]:.1f}, {it["y"]:.1f}) rotate({it["rot"]}) scale({it["scale"]:.4f}) translate(-{ox}, -{oy})">')
+        for p in asset['paths']:
+            f_color = adapt_color(p['fill'], pal, is_bg)
+            eo = ' fill-rule="evenodd"' if p.get('eo') else ''
+            op = f' fill-opacity="{p["op"]}"' if p.get('op') else ''
+            lines.append(f'      <path d="{p["d"]}" fill="{f_color}"{eo}{op}/>')
         lines.append('    </g>')
-
-    lines.extend([
-        '  </g>',
-        '</svg>'
-    ])
-
-    return '\n'.join(lines)
-
-
-# 1. Composition 1: 16:9 Banner - "Конспекты и лекции" (Purple Mist)
-# Studio Layout: Lamp (S bg) at (340, 260), Notebook (S main) at (720, 390), Phone (S main) at (810, 360), Pen (S main) at (620, 530)
-sample1 = [
-    {"objectType": "lamp", "size": "S", "state": "bg", "x": 340, "y": 260, "scale": 0.95, "zIndex": 5},
-    {"objectType": "notebook", "size": "S", "state": "main", "x": 720, "y": 390, "scale": 0.95, "zIndex": 15},
-    {"objectType": "phone", "size": "S", "state": "main", "x": 810, "y": 360, "scale": 0.85, "zIndex": 25},
-    {"objectType": "pen", "size": "S", "state": "main", "x": 620, "y": 530, "scale": 0.95, "zIndex": 30}
-]
-
-# 2. Composition 2: 1:1 Square - "Личные финансы и бюджет" (Warm Peach)
-# Studio Layout: Folder (S bg) at (440, 250), Wallet (L main) at (530, 710), Gold coin (L main) at (710, 760)
-sample2 = [
-    {"objectType": "folder", "size": "S", "state": "bg", "x": 440, "y": 250, "scale": 0.95, "zIndex": 5},
-    {"objectType": "wallet", "size": "L", "state": "main", "x": 530, "y": 710, "scale": 0.95, "zIndex": 20},
-    {"objectType": "coin", "size": "L", "state": "main", "x": 710, "y": 760, "scale": 0.95, "zIndex": 30}
-]
-
-# 3. Composition 3: 9:16 Stories - "Музыка и технологии" (Fresh Mint)
-# Studio Layout: Flowers (S bg) at (338, 340), Headphones (L main) at (338, 690), Puzzle (S main) at (338, 940)
-sample3 = [
-    {"objectType": "flowers", "size": "S", "state": "bg", "x": 338, "y": 340, "scale": 0.90, "zIndex": 5},
-    {"objectType": "headphones", "size": "L", "state": "main", "x": 338, "y": 690, "scale": 0.88, "zIndex": 20},
-    {"objectType": "puzzle", "size": "S", "state": "main", "x": 338, "y": 940, "scale": 0.95, "zIndex": 25}
-]
-
-tasks = [
-    ("sample-1-education-16x9.svg", "sample-1.png", sample1, "16:9", "purple"),
-    ("sample-2-finances-1x1.svg", "sample-2.png", sample2, "1:1", "peach"),
-    ("sample-3-startup-9x16.svg", "sample-3.png", sample3, "9:16", "mint")
-]
-
-for svg_name, png_name, items, fmt, pal in tasks:
-    svg_content = build_svg(items, fmt, pal, show_decor=True)
-    svg_path = os.path.join(OUT_DIR, svg_name)
-    with open(svg_path, "w", encoding="utf-8") as f:
+        
+    lines.append('  </g>')
+    lines.append('</svg>')
+    
+    svg_content = '\n'.join(lines)
+    svg_path = os.path.join(samples_dir, svg_filename)
+    with open(svg_path, 'w', encoding='utf-8') as f:
         f.write(svg_content)
-    print(f"Written: {svg_name}")
-
-    # Render PNG with pymupdf
-    doc = pymupdf.open("svg", svg_content.encode("utf-8"))
+    print(f"Written: {svg_filename}")
+    
+    # Render PNG
+    doc = fitz.open(stream=svg_content.encode('utf-8'), filetype='svg')
     page = doc[0]
     pix = page.get_pixmap(dpi=150)
-    png_path = os.path.join(OUT_DIR, png_name)
+    png_path = os.path.join(samples_dir, png_filename)
     pix.save(png_path)
-    print(f"Rendered: {png_name} ({pix.width}x{pix.height})")
+    print(f"Rendered: {png_filename} ({pix.width}x{pix.height})")
 
-print("All sample SVGs and PNGs successfully created!")
+# Sample 1: Журналистика и образование (16:9 Banner)
+generate_sample(
+    hero='notebook',
+    bg='lamp',
+    accent='pen',
+    format_wh=(1920, 1080),
+    pal_id='purple',
+    svg_filename='sample-1-education-16x9.svg',
+    png_filename='sample-1.png'
+)
+
+# Sample 2: Личные финансы и бюджет (1:1 Square)
+generate_sample(
+    hero='wallet',
+    bg='lamp',
+    accent='coin',
+    format_wh=(1000, 1000),
+    pal_id='peach',
+    svg_filename='sample-2-finances-1x1.svg',
+    png_filename='sample-2.png'
+)
+
+# Sample 3: Музыка и релакс (9:16 Vertical Stories)
+generate_sample(
+    hero='headphones',
+    bg='flowers',
+    accent='puzzle',
+    format_wh=(1080, 1920),
+    pal_id='mint',
+    svg_filename='sample-3-startup-9x16.svg',
+    png_filename='sample-3.png'
+)
+
+print("All sample SVGs and PNGs successfully regenerated with authentic user SVGs!")
