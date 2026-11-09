@@ -51,7 +51,7 @@ export function App() {
   const handleFormatChange = (newFormat: CanvasFormat) => {
     setFormat(newFormat);
     if (items.length > 0) {
-      setItems(prev => fitAndCenterScene(prev, newFormat, 50));
+      setItems(prev => fitAndCenterScene(prev, newFormat));
     }
   };
 

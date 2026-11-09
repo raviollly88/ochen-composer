@@ -27,9 +27,13 @@ export function buildStandaloneSVG(
     `    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">`,
     `      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.10"/>`,
     `    </filter>`,
+    `    <clipPath id="card-frame-clip">`,
+    `      <rect width="${W}" height="${H}" rx="20"/>`,
+    `    </clipPath>`,
     `  </defs>`,
     `  <!-- Canvas Background -->`,
-    `  <rect width="${W}" height="${H}" rx="20" fill="${palette.bgPrimary}"/>`
+    `  <rect width="${W}" height="${H}" rx="20" fill="${palette.bgPrimary}"/>`,
+    `  <g clip-path="url(#card-frame-clip)">`
   ];
 
   if (showDecor) {
@@ -37,22 +41,22 @@ export function buildStandaloneSVG(
     const ellipseRx = Math.min(90, W * 0.12);
     const ellipseRy = ellipseRx * 0.46;
 
-    lines.push(`  <!-- Studio Ochen Background Decorative Scratches & Accents -->`);
-    lines.push(`  <g id="background-decor">`);
-    lines.push(`    <line x1="${cx - lineSpan}" y1="${cy + lineSpan * 0.22}" x2="${cx - lineSpan * 0.15}" y2="${cy - lineSpan * 0.28}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>`);
-    lines.push(`    <line x1="${cx - lineSpan * 0.70}" y1="${cy - lineSpan * 0.45}" x2="${cx - lineSpan * 0.40}" y2="${cy - lineSpan * 0.62}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>`);
-    lines.push(`    <line x1="${cx + lineSpan * 0.35}" y1="${cy + lineSpan * 0.45}" x2="${cx + lineSpan * 0.55}" y2="${cy + lineSpan * 0.33}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>`);
-    lines.push(`    <ellipse cx="${cx - 120}" cy="${cy - 50}" rx="${ellipseRx}" ry="${ellipseRy}" fill="${strokeColor}" opacity="0.12"/>`);
-    lines.push(`    <!-- Signature Corner Pills -->`);
-    lines.push(`    <g transform="translate(75, ${H - 65})">`);
-    lines.push(`      <ellipse cx="20" cy="22" rx="28" ry="14" fill="${strokeColor}" opacity="0.65"/>`);
-    lines.push(`      <ellipse cx="44" cy="10" rx="28" ry="14" fill="#ffffff" opacity="0.95"/>`);
+    lines.push(`    <!-- Studio Ochen Background Decorative Scratches & Accents -->`);
+    lines.push(`    <g id="background-decor">`);
+    lines.push(`      <line x1="${cx - lineSpan}" y1="${cy + lineSpan * 0.22}" x2="${cx - lineSpan * 0.15}" y2="${cy - lineSpan * 0.28}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>`);
+    lines.push(`      <line x1="${cx - lineSpan * 0.70}" y1="${cy - lineSpan * 0.45}" x2="${cx - lineSpan * 0.40}" y2="${cy - lineSpan * 0.62}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>`);
+    lines.push(`      <line x1="${cx + lineSpan * 0.35}" y1="${cy + lineSpan * 0.45}" x2="${cx + lineSpan * 0.55}" y2="${cy + lineSpan * 0.33}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>`);
+    lines.push(`      <ellipse cx="${cx - 120}" cy="${cy - 50}" rx="${ellipseRx}" ry="${ellipseRy}" fill="${strokeColor}" opacity="0.12"/>`);
+    lines.push(`      <!-- Signature Corner Pills -->`);
+    lines.push(`      <g transform="translate(75, ${H - 65})">`);
+    lines.push(`        <ellipse cx="20" cy="22" rx="28" ry="14" fill="${strokeColor}" opacity="0.65"/>`);
+    lines.push(`        <ellipse cx="44" cy="10" rx="28" ry="14" fill="#ffffff" opacity="0.95"/>`);
+    lines.push(`      </g>`);
     lines.push(`    </g>`);
-    lines.push(`  </g>`);
   }
 
-  lines.push(`  <!-- Composition Elements -->`);
-  lines.push(`  <g id="composition-layer" filter="url(#card-shadow)">`);
+  lines.push(`    <!-- Composition Elements -->`);
+  lines.push(`    <g id="composition-layer" filter="url(#card-shadow)">`);
 
   for (const item of sortedItems) {
     const assetId = `${item.objectType}-${item.size}-${item.state}`;
@@ -63,20 +67,21 @@ export function buildStandaloneSVG(
     const ox = asset.w / 2;
     const oy = asset.h / 2;
 
-    lines.push(`    <!-- Object: ${item.objectType} (${item.state}) -->`);
-    lines.push(`    <g transform="translate(${item.x}, ${item.y}) rotate(${item.rotation}) scale(${item.scale}) translate(-${ox}, -${oy})">`);
+    lines.push(`      <!-- Object: ${item.objectType} (${item.state}) -->`);
+    lines.push(`      <g transform="translate(${item.x}, ${item.y}) rotate(${item.rotation}) scale(${item.scale}) translate(-${ox}, -${oy})">`);
 
     const isMonochrome = item.state === 'bg';
     for (const p of asset.paths) {
       const fill = adaptColorToPalette(p.fill, palette, isMonochrome);
       const eo = p.eo ? ` fill-rule="evenodd"` : '';
       const op = p.op && p.op < 1 ? ` fill-opacity="${p.op}"` : '';
-      lines.push(`      <path d="${p.d}" fill="${fill}"${eo}${op}/>`);
+      lines.push(`        <path d="${p.d}" fill="${fill}"${eo}${op}/>`);
     }
 
-    lines.push(`    </g>`);
+    lines.push(`      </g>`);
   }
 
+  lines.push(`    </g>`);
   lines.push(`  </g>`);
   lines.push(`</svg>`);
 

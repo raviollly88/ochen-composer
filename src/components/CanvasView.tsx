@@ -116,6 +116,9 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
             <filter id="element-shadow" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#000000" floodOpacity="0.12" />
             </filter>
+            <clipPath id="canvas-card-clip">
+              <rect width={cfg.width} height={cfg.height} rx={20} />
+            </clipPath>
           </defs>
 
           {/* Background rect: clicking here deselects */}
@@ -128,76 +131,89 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
             className="cursor-default"
           />
 
-          {/* Authentic Studio Ochen background scratches & accents */}
-          <BackgroundDecor
-            width={cfg.width}
-            height={cfg.height}
-            palette={palette}
-            showDecor={showDecor}
-          />
+          {/* Framed card content with clean rounded boundary clipping */}
+          <g clipPath="url(#canvas-card-clip)">
+            {/* Authentic Studio Ochen background scratches & accents */}
+            <BackgroundDecor
+              width={cfg.width}
+              height={cfg.height}
+              palette={palette}
+              showDecor={showDecor}
+            />
 
-          {/* Render composition objects */}
-          {sortedItems.map(item => {
-            const assetId = `${item.objectType}-${item.size}-${item.state}`;
-            const asset = assetMap[assetId];
-            if (!asset) return null;
+            {/* Render composition objects */}
+            {sortedItems.map(item => {
+              const assetId = `${item.objectType}-${item.size}-${item.state}`;
+              const asset = assetMap[assetId];
+              if (!asset) return null;
 
-            const isSelected = selectedItemId === item.id;
-            const isMonochrome = item.state === 'bg';
-            const ox = asset.w / 2;
-            const oy = asset.h / 2;
+              const isSelected = selectedItemId === item.id;
+              const isMonochrome = item.state === 'bg';
+              const ox = asset.w / 2;
+              const oy = asset.h / 2;
 
-            return (
-              <g
-                key={item.id}
-                transform={`translate(${item.x}, ${item.y}) rotate(${item.rotation}) scale(${item.scale}) translate(-${ox}, -${oy})`}
-                onPointerDown={e => handlePointerDown(e, item.id)}
-                onClick={e => {
-                  e.stopPropagation();
-                  onSelectItem(item.id);
-                }}
-                className="cursor-grab active:cursor-grabbing transition-opacity"
-                filter="url(#element-shadow)"
-              >
-                {/* Visual outline/highlight when selected (Figma-style) */}
-                {isSelected && (
-                  <g pointerEvents="none">
-                    <rect
-                      x={-6}
-                      y={-6}
-                      width={asset.w + 12}
-                      height={asset.h + 12}
-                      rx={8}
-                      fill="none"
-                      stroke="#3b82f6"
-                      strokeWidth={3}
-                      strokeDasharray="8 5"
-                      opacity={0.9}
-                    />
-                    {/* Corner handles */}
-                    <circle cx={-6} cy={-6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
-                    <circle cx={asset.w + 6} cy={-6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
-                    <circle cx={-6} cy={asset.h + 6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
-                    <circle cx={asset.w + 6} cy={asset.h + 6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
-                  </g>
-                )}
+              return (
+                <g
+                  key={item.id}
+                  transform={`translate(${item.x}, ${item.y}) rotate(${item.rotation}) scale(${item.scale}) translate(-${ox}, -${oy})`}
+                  onPointerDown={e => handlePointerDown(e, item.id)}
+                  onClick={e => {
+                    e.stopPropagation();
+                    onSelectItem(item.id);
+                  }}
+                  className="cursor-grab active:cursor-grabbing transition-opacity"
+                  filter="url(#element-shadow)"
+                >
+                  {/* Invisible hit-area to allow instant single-click selection anywhere on the object */}
+                  <rect
+                    x={0}
+                    y={0}
+                    width={asset.w}
+                    height={asset.h}
+                    fill="transparent"
+                    className="cursor-pointer"
+                  />
 
-                {/* SVG Paths of object */}
-                {asset.paths.map((p: SVGPath, idx: number) => {
-                  const fill = adaptColorToPalette(p.fill, palette, isMonochrome);
-                  return (
-                    <path
-                      key={idx}
-                      d={p.d}
-                      fill={fill}
-                      fillRule={p.eo ? 'evenodd' : undefined}
-                      fillOpacity={p.op && p.op < 1 ? p.op : undefined}
-                    />
-                  );
-                })}
-              </g>
-            );
-          })}
+                  {/* Visual outline/highlight when selected (Figma-style) */}
+                  {isSelected && (
+                    <g pointerEvents="none">
+                      <rect
+                        x={-6}
+                        y={-6}
+                        width={asset.w + 12}
+                        height={asset.h + 12}
+                        rx={8}
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth={3}
+                        strokeDasharray="8 5"
+                        opacity={0.9}
+                      />
+                      {/* Corner handles */}
+                      <circle cx={-6} cy={-6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                      <circle cx={asset.w + 6} cy={-6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                      <circle cx={-6} cy={asset.h + 6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                      <circle cx={asset.w + 6} cy={asset.h + 6} r={5} fill="#ffffff" stroke="#3b82f6" strokeWidth={2} />
+                    </g>
+                  )}
+
+                  {/* SVG Paths of object */}
+                  {asset.paths.map((p: SVGPath, idx: number) => {
+                    const fill = adaptColorToPalette(p.fill, palette, isMonochrome);
+                    return (
+                      <path
+                        key={idx}
+                        d={p.d}
+                        fill={fill}
+                        fillRule={p.eo ? 'evenodd' : undefined}
+                        fillOpacity={p.op && p.op < 1 ? p.op : undefined}
+                      />
+                    );
+                  })}
+                </g>
+              );
+            })}
+          </g>
         </svg>
 
         {/* Empty state hint */}
