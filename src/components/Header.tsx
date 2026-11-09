@@ -2,7 +2,7 @@ import React from 'react';
 import type { CanvasFormat, DetailSize } from '../types';
 import { FORMATS } from '../types';
 import type { Palette } from '../palettes';
-import { Download, Trash2, Palette as PaletteIcon } from 'lucide-react';
+import { Download, Trash2, Palette as PaletteIcon, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
   format: CanvasFormat;
@@ -13,6 +13,8 @@ interface HeaderProps {
   paletteId: string;
   onPaletteChange: (pal: string) => void;
   onOpenPaletteModal: () => void;
+  showDecor: boolean;
+  onToggleDecor: () => void;
   onExportSVG: () => void;
   onClearCanvas: () => void;
   itemsCount: number;
@@ -27,6 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
   paletteId,
   onPaletteChange,
   onOpenPaletteModal,
+  showDecor,
+  onToggleDecor,
   onExportSVG,
   onClearCanvas,
   itemsCount,
@@ -121,6 +125,20 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <PaletteIcon size={13} />
             <span className="hidden md:inline">Палитра</span>
+          </button>
+
+          {/* Background Decor Toggle (Studio scratches and accents) */}
+          <button
+            onClick={onToggleDecor}
+            title={showDecor ? 'Отключить фирменные штрихи фона' : 'Включить фирменные штрихи фона'}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs font-medium border ${
+              showDecor
+                ? 'bg-zinc-800 text-zinc-100 border-zinc-700 shadow-sm'
+                : 'text-zinc-500 border-zinc-800 hover:text-zinc-300'
+            }`}
+          >
+            <Sparkles size={13} className={showDecor ? 'text-amber-400' : 'text-zinc-500'} />
+            <span className="hidden lg:inline">Декор фона</span>
           </button>
         </div>
       </div>

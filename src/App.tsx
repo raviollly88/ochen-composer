@@ -21,10 +21,11 @@ export function App() {
     return map;
   }, []);
 
-  const [format, setFormat] = useState<CanvasFormat>('16:9');
+  const [format, setFormat] = useState<CanvasFormat>('1:1');
   const [detailSize, setDetailSize] = useState<DetailSize>('L');
   const [palettes, setPalettes] = useState<Record<string, Palette>>(DEFAULT_PALETTES);
   const [paletteId, setPaletteId] = useState<PaletteId>('purple');
+  const [showDecor, setShowDecor] = useState(true);
   const [isPaletteModalOpen, setIsPaletteModalOpen] = useState(false);
   const [items, setItems] = useState<CanvasItem[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -32,9 +33,9 @@ export function App() {
 
   const currentPalette = palettes[paletteId] || DEFAULT_PALETTES.purple;
 
-  // Initialize with a clean Studio Ochen reference composition
+  // Initialize with the studio's iconic composition (Headphones + Flowers with background decor)
   useEffect(() => {
-    const initial = generateCompositionFromPrompt('Конспекты и продуктивность', '16:9', 'L');
+    const initial = generateCompositionFromPrompt('Музыка и отдых', '1:1', 'L');
     setItems(initial.items);
     setPaletteId(initial.recommendedPalette);
     setLastAiRationale(initial.rationale);
@@ -122,7 +123,7 @@ export function App() {
 
   // Export SVG
   const handleExportSVG = () => {
-    const svgString = buildStandaloneSVG(items, format, currentPalette, assetMap);
+    const svgString = buildStandaloneSVG(items, format, currentPalette, assetMap, showDecor);
     downloadSVG(svgString, `ochen-composition-${format}-${paletteId}.svg`);
   };
 
@@ -152,6 +153,8 @@ export function App() {
         paletteId={paletteId}
         onPaletteChange={setPaletteId}
         onOpenPaletteModal={() => setIsPaletteModalOpen(true)}
+        showDecor={showDecor}
+        onToggleDecor={() => setShowDecor(p => !p)}
         onExportSVG={handleExportSVG}
         onClearCanvas={handleClearCanvas}
         itemsCount={items.length}
@@ -185,6 +188,7 @@ export function App() {
             selectedItemId={selectedItemId}
             onSelectItem={setSelectedItemId}
             onUpdateItem={handleUpdateItem}
+            showDecor={showDecor}
           />
         </main>
       </div>

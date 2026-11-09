@@ -3,6 +3,7 @@ import type { AssetMeta, CanvasFormat, CanvasItem, SVGPath } from '../types';
 import { FORMATS } from '../types';
 import type { Palette } from '../palettes';
 import { adaptColorToPalette } from '../palettes';
+import { BackgroundDecor } from './BackgroundDecor';
 
 interface CanvasViewProps {
   items: CanvasItem[];
@@ -12,6 +13,7 @@ interface CanvasViewProps {
   selectedItemId: string | null;
   onSelectItem: (id: string | null) => void;
   onUpdateItem: (id: string, updates: Partial<CanvasItem>) => void;
+  showDecor?: boolean;
 }
 
 export const CanvasView: React.FC<CanvasViewProps> = ({
@@ -22,6 +24,7 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
   selectedItemId,
   onSelectItem,
   onUpdateItem,
+  showDecor = true,
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const cfg = FORMATS[format];
@@ -121,6 +124,14 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
             fill={palette.bgPrimary}
             onClick={() => onSelectItem(null)}
             className="cursor-default"
+          />
+
+          {/* Authentic Studio Ochen background scratches & accents */}
+          <BackgroundDecor
+            width={cfg.width}
+            height={cfg.height}
+            palette={palette}
+            showDecor={showDecor}
           />
 
           {/* Render composition objects */}
