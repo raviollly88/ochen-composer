@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { AssetMeta, CanvasFormat, CanvasItem, DetailSize, ObjectState, PaletteId } from './types';
 import { FORMATS } from './types';
 import type { Palette } from './palettes';
@@ -21,25 +21,20 @@ export function App() {
     return map;
   }, []);
 
+  const [initialComposition] = useState(() =>
+    generateCompositionFromPrompt('Музыка и отдых', '1:1', 'L')
+  );
   const [format, setFormat] = useState<CanvasFormat>('1:1');
   const [detailSize, setDetailSize] = useState<DetailSize>('L');
   const [palettes, setPalettes] = useState<Record<string, Palette>>(DEFAULT_PALETTES);
-  const [paletteId, setPaletteId] = useState<PaletteId>('purple');
+  const [paletteId, setPaletteId] = useState<PaletteId>(initialComposition.recommendedPalette);
   const [showDecor, setShowDecor] = useState(true);
   const [isPaletteModalOpen, setIsPaletteModalOpen] = useState(false);
-  const [items, setItems] = useState<CanvasItem[]>([]);
+  const [items, setItems] = useState<CanvasItem[]>(initialComposition.items);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [lastAiRationale, setLastAiRationale] = useState<string | null>(null);
+  const [lastAiRationale, setLastAiRationale] = useState<string | null>(initialComposition.rationale);
 
   const currentPalette = palettes[paletteId] || DEFAULT_PALETTES.purple;
-
-  // Initialize with the studio's iconic composition (Headphones + Flowers with background decor)
-  useEffect(() => {
-    const initial = generateCompositionFromPrompt('Музыка и отдых', '1:1', 'L');
-    setItems(initial.items);
-    setPaletteId(initial.recommendedPalette);
-    setLastAiRationale(initial.rationale);
-  }, []);
 
   // Handlers for Canvas manipulation
   const handleUpdateItem = (id: string, updates: Partial<CanvasItem>) => {

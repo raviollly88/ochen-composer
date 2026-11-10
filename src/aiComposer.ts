@@ -16,7 +16,486 @@ export interface PresetTheme {
   palette: PaletteId;
 }
 
+export interface AIScenario {
+  id: string;
+  title: string;
+  description: string;
+  editorialConcept: string;
+  visualMetaphor: string;
+  hero: string;
+  bg: string | null;
+  accent: string | null;
+  palette: PaletteId;
+  paletteRationale: string;
+  intentKeywords: string[];
+  intentTags: string[];
+  discriminators?: string[];
+}
+
+/**
+ * 20 Distinct, finely-tuned semantic knowledge-base scenarios for Studio Ochen compositions.
+ * Each scenario models an editorial publication topic with authentic visual metaphors,
+ * strict 2-3 object limits, depth layering, and psychological palette pairings.
+ */
+export const AI_SCENARIOS: AIScenario[] = [
+  // 1. Музыка и отдых (Headphones + Flowers)
+  {
+    id: 'music_relaxation',
+    title: 'Музыка и отдых',
+    description: 'Наушники на первом плане и ваза с цветами в мягком фокусе (эталон студии)',
+    editorialConcept: 'Атмосфера звукового погружения, акустического комфорта и гармоничного отдыха',
+    visualMetaphor: 'Беспроводные наушники как символ чистого звука на переднем плане перед вазой с весенними цветами',
+    hero: 'headphones',
+    bg: 'flowers',
+    accent: null,
+    palette: 'mint',
+    paletteRationale: 'Мятная палитра Fresh Mint создает ощущение прохлады, чистоты звука и ментального расслабления',
+    intentKeywords: [
+      'музык', 'отдых', 'релакс', 'трек', 'звук', 'аудио', 'плейлист', 'мелоди', 'бит',
+      'песн', 'ваз', 'цвет', 'наушник', 'акустик', 'гармони', 'релаксац', 'вайб',
+      'слушат', 'композитор', 'радио', 'вокал', 'саундтрек', 'лаунж',
+      'music', 'relax', 'sound', 'audio', 'tune', 'playlist', 'chill', 'headphones', 'flowers'
+    ],
+    intentTags: ['Аудиокультура', 'Звуковая терапия', 'Отдых и гармония', 'Музыкальный стриминг'],
+    discriminators: ['музык', 'песн', 'трек', 'вайб', 'плейлист']
+  },
+
+  // 2. Личные финансы и бюджет (Wallet + Lamp + Coin)
+  {
+    id: 'personal_finance',
+    title: 'Личные финансы и бюджет',
+    description: 'Кожаный кошелек, монета на переднем плане и фоновая лампа (эталон студии)',
+    editorialConcept: 'Управление личными накоплениями, финансовая грамотность и осознанный учет бюджета',
+    visualMetaphor: 'Кошелек как фокус материальных ресурсов, монета вдоль 30° оси для динамики транзакций и лампа вечернего учета',
+    hero: 'wallet',
+    bg: 'lamp',
+    accent: 'coin',
+    palette: 'peach',
+    paletteRationale: 'Теплый персик Warm Peach передает материальную надежность, стабильность и осязаемость капитала',
+    intentKeywords: [
+      'финанс', 'бюджет', 'кошел', 'деньг', 'накоплен', 'сбережен', 'доход', 'расход',
+      'зарплат', 'капитал', 'трат', 'эконом', 'счет', 'наличн', 'монет', 'банк',
+      'кеш', 'подушк', 'рубл', 'доллар', 'евро', 'портмоне', 'платеж', 'баланс',
+      'wallet', 'money', 'budget', 'finance', 'salary', 'savings', 'cash', 'income'
+    ],
+    intentTags: ['Личный бюджет', 'Финансовая грамотность', 'Управление капиталом', 'Сбережения'],
+    discriminators: ['бюджет', 'кошел', 'деньг', 'зарплат', 'расход', 'доход', 'накоплен']
+  },
+
+  // 3. Журналистика и писательство (Notebook + Lamp + Pen)
+  {
+    id: 'journalism_writing',
+    title: 'Журналистика и писательство',
+    description: 'Открытый блокнот, настольная лампа в фоне и ручка перед разворотом (референс студии)',
+    editorialConcept: 'Авторское ремесло, редакторская работа, написание публицистических статей и литературное творчество',
+    visualMetaphor: 'Развернутый блокнот в свете настольной лампы и перьевая ручка у линии закладки',
+    hero: 'notebook',
+    bg: 'lamp',
+    accent: 'pen',
+    palette: 'purple',
+    paletteRationale: 'Глубокий чернильно-пурпурный цвет Purple Mist отсылает к типографской краске и книжным переплетам',
+    intentKeywords: [
+      'журналист', 'писател', 'автор', 'стать', 'текст', 'рукопис', 'репортаж',
+      'блокнот', 'ручк', 'перо', 'редакци', 'копирайт', 'эссе', 'книг', 'чернил',
+      'публикац', 'пресса', 'издательств', 'сценар', 'поэзи', 'стих', 'заметк',
+      'write', 'author', 'journalism', 'article', 'essay', 'notebook', 'pen', 'press'
+    ],
+    intentTags: ['Публицистика', 'Авторский текст', 'Редакторское ремесло', 'Литературное творчество'],
+    discriminators: ['журналист', 'писател', 'репортаж', 'рукопис', 'автор', 'стать']
+  },
+
+  // 4. IT-стартап и разработка (Phone + Lamp + Puzzle)
+  {
+    id: 'it_startup_dev',
+    title: 'IT-стартап и разработка',
+    description: 'Смартфон с мобильным приложением и пазлы архитектуры под лампой',
+    editorialConcept: 'Создание технологического продукта, микросервисная архитектура и запуск инновационного SaaS',
+    visualMetaphor: 'Смартфон с сервисом, настольная лампа рабочей зоны и модули сборки архитектурного пазла',
+    hero: 'phone',
+    bg: 'lamp',
+    accent: 'puzzle',
+    palette: 'mint',
+    paletteRationale: 'Свежий технологичный мятный оттенок подчеркивает инновации и гибкую цифровую экосистему',
+    intentKeywords: [
+      'стартап', 'технологи', 'приложен', 'код', 'разработк', 'программ', 'saas', 'дев',
+      'архитектур', 'пазл', 'скрипт', 'инженер', 'сервис', 'бэкенд', 'фронтенд', 'деплой',
+      'гит', 'коммит', 'релиз', 'баг', 'фич', 'api', 'интеграц', 'it',
+      'startup', 'dev', 'code', 'software', 'tech', 'architecture', 'puzzle', 'engineer'
+    ],
+    intentTags: ['Software Engineering', 'Стартап-экосистема', 'Архитектура решений', 'Цифровые продукты'],
+    discriminators: ['стартап', 'saas', 'код', 'разработк', 'архитектур']
+  },
+
+  // 5. Рабочее пространство и порядок (Folder + Lamp + Pen)
+  {
+    id: 'workspace_order',
+    title: 'Рабочее пространство и порядок',
+    description: 'Папка документов, ручка для подписи и настольная лампа в фоне',
+    editorialConcept: 'Организация рабочего стола, регламенты, корпоративное делопроизводство и структурный порядок',
+    visualMetaphor: 'Папка документов, перьевая ручка для визирования резолюций и настольная лампа кабинета',
+    hero: 'folder',
+    bg: 'lamp',
+    accent: 'pen',
+    palette: 'purple',
+    paletteRationale: 'Строгая фиолетовая палитра задает тон собранности, структурности и деловой дисциплины',
+    intentKeywords: [
+      'папк', 'документ', 'офис', 'порядок', 'регламент', 'делопроизводств', 'дело',
+      'архив', 'стол', 'кабинет', 'рабоч', 'подпис', 'ручк', 'канцеляр', 'досье',
+      'бюрократи', 'отчет', 'структур', 'инструкци', 'согласован',
+      'workspace', 'office', 'folder', 'documents', 'desk', 'order', 'report'
+    ],
+    intentTags: ['Делопроизводство', 'Организация офиса', 'Рабочие процессы', 'Документооборот'],
+    discriminators: ['делопроизводств', 'регламент', 'архив', 'канцеляр', 'документооборот']
+  },
+
+  // 6. Кибербезопасность и защита данных (Wallet + Coin + Puzzle)
+  {
+    id: 'cybersecurity',
+    title: 'Кибербезопасность и защита данных',
+    description: 'Защищенное хранилище, криптографический пазл и токен безопасности',
+    editorialConcept: 'Информационная безопасность, защита персональных данных, шифрование и защита от киберугроз',
+    visualMetaphor: 'Кошелек как защищенный периметр, составные блоки защитного пазла и токен аутентификации',
+    hero: 'wallet',
+    bg: 'puzzle',
+    accent: 'coin',
+    palette: 'purple',
+    paletteRationale: 'Пурпурный оттенок символизирует надежность защитного периметра, конфиденциальность и устойчивость',
+    intentKeywords: [
+      'кибербезопасн', 'безопасн', 'защит', 'данн', 'парол', 'шифрован', 'утечк',
+      'уязвимост', 'хакер', 'атак', 'периметр', 'токен', 'аутентификац', 'доступ',
+      'приватност', 'vpn', 'брандмауэр', 'криптографи', 'secops',
+      'security', 'cyber', 'privacy', 'protection', 'encryption', 'auth', 'hacker'
+    ],
+    intentTags: ['Информационная безопасность', 'Защита данных', 'Криптография', 'Киберугрозы'],
+    discriminators: ['кибербезопасн', 'шифрован', 'утечк', 'уязвимост', 'хакер', 'парол']
+  },
+
+  // 7. Учеба, лекции и конспекты (Notebook + Pen + Phone)
+  {
+    id: 'education_lectures',
+    title: 'Учеба, лекции и конспекты',
+    description: 'Развернутый конспект со смартфоном и ручкой для академических записей',
+    editorialConcept: 'Университетское образование, студенческие лекции, конспекты и подготовка к экзаменам',
+    visualMetaphor: 'Открытый блокнот с записями, смартфон с учебными материалами и ручка для пометок',
+    hero: 'notebook',
+    bg: 'phone',
+    accent: 'pen',
+    palette: 'peach',
+    paletteRationale: 'Персиковый колорит способствует длительной умственной концентрации и когнитивному комфорту',
+    intentKeywords: [
+      'учеб', 'лекци', 'конспект', 'сесси', 'экзамен', 'студент', 'университет',
+      'вуз', 'школ', 'курс', 'тетрад', 'заметк', 'запис', 'диплом', 'реферат',
+      'семинар', 'преподавател', 'шпоргалк', 'зачет', 'обучен',
+      'education', 'study', 'lecture', 'notes', 'student', 'exam', 'university'
+    ],
+    intentTags: ['Академическое обучение', 'Студенческая жизнь', 'Конспектирование', 'Подготовка к экзаменам'],
+    discriminators: ['сесси', 'экзамен', 'студент', 'лекци', 'конспект', 'вуз']
+  },
+
+  // 8. Юриспруденция и договоры (Folder + Notebook + Pen)
+  {
+    id: 'law_contracts',
+    title: 'Юриспруденция и договоры',
+    description: 'Материалы дела, свод нормативов и ручка для визирования контрактов',
+    editorialConcept: 'Юридическая практика, экспертиза контрактов, судебные споры и правовые регламенты',
+    visualMetaphor: 'Деловое досье, нормативный блокнот законов и ручка для визирования соглашений',
+    hero: 'folder',
+    bg: 'notebook',
+    accent: 'pen',
+    palette: 'purple',
+    paletteRationale: 'Академический пурпур подчеркивает авторитет закона, точность формулировок и процессуальный статус',
+    intentKeywords: [
+      'юриспруденц', 'договор', 'контракт', 'прав', 'закон', 'юрист', 'адвокат',
+      'суд', 'арбитраж', 'соглашен', 'иск', 'норматив', 'кодекс', 'неустойк',
+      'сделк', 'правовой', 'нотариус', 'претензи', 'юридическ',
+      'legal', 'law', 'contract', 'lawyer', 'court', 'agreement', 'justice'
+    ],
+    intentTags: ['Юридическая практика', 'Договорное право', 'Правовая экспертиза', 'Арбитраж'],
+    discriminators: ['юрист', 'адвокат', 'суд', 'арбитраж', 'договор', 'контракт', 'иск']
+  },
+
+  // 9. Мобильные приложения и сервисы (Phone + Headphones + Puzzle)
+  {
+    id: 'mobile_apps',
+    title: 'Мобильные приложения и сервисы',
+    description: 'Смартфон с открытым сервисом, гарнитура связи и модульные блоки функционала',
+    editorialConcept: 'Мобильный опыт пользователя, экосистема мобильных сервисов и поведение в приложениях',
+    visualMetaphor: 'Смартфон с активным интерфейсом, аудионаушники стриминга и модульные виджеты UI',
+    hero: 'phone',
+    bg: 'headphones',
+    accent: 'puzzle',
+    palette: 'mint',
+    paletteRationale: 'Мятный оттенок передает эргономику экранов современных девайсов и легкость взаимодействия',
+    intentKeywords: [
+      'мобил', 'приложен', 'смартфон', 'ios', 'android', 'интерфейс', 'ux', 'ui',
+      'виджет', 'экран', 'сервис', 'аппк', 'фич', 'онбординг', 'экосистем',
+      'девайс', 'гаджет', 'пуш', 'айфон',
+      'mobile', 'app', 'smartphone', 'interface', 'features', 'ux', 'ui', 'device'
+    ],
+    intentTags: ['Мобильные сервисы', 'UI/UX дизайн', 'Экосистема приложений', 'Мобильный стек'],
+    discriminators: ['мобильн', 'смартфон', 'ios', 'android', 'аппк', 'онбординг']
+  },
+
+  // 10. Инвестиции и крипта (Wallet + Folder + Coin)
+  {
+    id: 'crypto_investments',
+    title: 'Инвестиции и крипта',
+    description: 'Криптокошелек, папка инвестиционного портфеля и цифровая монета',
+    editorialConcept: 'Рынок криптовалют, венчурные инвестиции, доходность активов и блокчейн-проекты',
+    visualMetaphor: 'Криптокошелек, папка инвестиционного портфеля и цифровая монета на переднем плане',
+    hero: 'wallet',
+    bg: 'folder',
+    accent: 'coin',
+    palette: 'peach',
+    paletteRationale: 'Золотисто-персиковая палитра символизирует финансовый рост, инвестиционный капитал и дивиденды',
+    intentKeywords: [
+      'крипт', 'биткоин', 'блокчейн', 'инвестиц', 'токен', 'монет', 'портфел',
+      'актив', 'доходност', 'дивиденд', 'трейдинг', 'биржа', 'ethereum', 'btc',
+      'стейкинг', 'defi', 'халвинг', 'криптовалют', 'фондов', 'акци',
+      'crypto', 'bitcoin', 'investment', 'blockchain', 'portfolio', 'trading', 'token'
+    ],
+    intentTags: ['Криптоиндустрия', 'Инвестиционный портфель', 'Блокчейн-активы', 'Венчурные сделки'],
+    discriminators: ['крипт', 'биткоин', 'блокчейн', 'инвестиц', 'дивиденд', 'токен', 'btc']
+  },
+
+  // 11. Диджитал-маркетинг и аналитика (Folder + Phone + Puzzle)
+  {
+    id: 'digital_marketing',
+    title: 'Диджитал-маркетинг и аналитика',
+    description: 'Смартфон рекламных кампаний, папка отчетов и кусочки воронки конверсии',
+    editorialConcept: 'Интернет-маркетинг, воронки продаж, таргетированная реклама, сквозная аналитика и retention',
+    visualMetaphor: 'Смартфон с рекламным дашбордом, папка маркетинговых отчетов и элементы воронки конверсии',
+    hero: 'phone',
+    bg: 'folder',
+    accent: 'puzzle',
+    palette: 'mint',
+    paletteRationale: 'Динамичный мятный цвет ассоциируется с ростом трафика, конверсией и гибкими гипотезами',
+    intentKeywords: [
+      'маркетинг', 'реклам', 'трафик', 'воронк', 'конверси', 'таргет', 'аналитик',
+      'лид', 'retention', 'метрик', 'кампани', 'roi', 'smm', 'продвижен',
+      'контекст', 'клик', 'аудитори', 'сегментац',
+      'marketing', 'traffic', 'funnel', 'conversion', 'analytics', 'growth', 'leads'
+    ],
+    intentTags: ['Digital Marketing', 'Сквозная аналитика', 'Воронки продаж', 'Трафик и конверсия'],
+    discriminators: ['маркетинг', 'таргет', 'трафик', 'воронк', 'конверси', 'лид']
+  },
+
+  // 12. Путешествия и впечатления (Phone + Flowers + Headphones)
+  {
+    id: 'travel_impressions',
+    title: 'Путешествия и впечатления',
+    description: 'Наушники для дороги, свежие цветы и смартфон с билетами и маршрутом',
+    editorialConcept: 'Туризм, поездки в новые страны, культурные открытия, дорожные заметки и вдохновение',
+    visualMetaphor: 'Наушники для атмосферного дорожного плейлиста, свежие цветы и смартфон с билетами',
+    hero: 'headphones',
+    bg: 'flowers',
+    accent: 'phone',
+    palette: 'mint',
+    paletteRationale: 'Свежий мятный цвет передает воздух дальних странствий, новизну впечатлений и свободу',
+    intentKeywords: [
+      'путешеств', 'туризм', 'поездк', 'отпуск', 'билет', 'маршрут', 'город',
+      'отел', 'самолет', 'впечатлен', 'дорог', 'гид', 'экскурси', 'стран',
+      'багаж', 'аэропорт', 'рейс', 'чемодан', 'виза', 'пляж', 'гор',
+      'travel', 'trip', 'tour', 'vacation', 'journey', 'flight', 'destination'
+    ],
+    intentTags: ['Путешествия и туризм', 'Дорожные заметки', 'Культурные впечатления', 'Экспедиции'],
+    discriminators: ['путешеств', 'туризм', 'отпуск', 'поездк', 'билет', 'отел', 'рейс']
+  },
+
+  // 13. Уют и домашняя атмосфера (Flowers + Lamp + Notebook)
+  {
+    id: 'cozy_home',
+    title: 'Уют и домашняя атмосфера',
+    description: 'Личный дневник на столике, мягкий свет лампы и весенний букет в вазе',
+    editorialConcept: 'Домашний очаг, медленная жизнь (slow living), уютные вечера, декор и теплое пространство',
+    visualMetaphor: 'Личный дневник на столе, мягкий свет настольной лампы и весенний букет в вазе',
+    hero: 'notebook',
+    bg: 'lamp',
+    accent: 'flowers',
+    palette: 'peach',
+    paletteRationale: 'Персиковое тепло окутывает пространство уютом, согревает и создает атмосферу дома',
+    intentKeywords: [
+      'уют', 'дом', 'атмосфер', 'тепл', 'хюгге', 'интерьер', 'комфорт', 'вечер',
+      'покой', 'камин', 'плед', 'свеч', 'ваз', 'цвет', 'тишин', 'семейн',
+      'дизайн интерьер', 'декор', 'мебел', 'скандинавск',
+      'cozy', 'home', 'interior', 'warm', 'hygge', 'comfort', 'peace', 'flowers'
+    ],
+    intentTags: ['Домашний уют', 'Хюгге и интерьер', 'Slow living', 'Гармония пространства'],
+    discriminators: ['уют', 'хюгге', 'интерьер', 'плед', 'тепл', 'дом']
+  },
+
+  // 14. Логистика и цепочки поставок (Folder + Puzzle + Coin)
+  {
+    id: 'logistics_supply',
+    title: 'Логистика и цепочки поставок',
+    description: 'Папка транспортных накладных, звенья цепи поставок и расчет фрахта',
+    editorialConcept: 'Управление цепочками поставок (Supply Chain), складской учет, транспортные хабы и оптимизация фрахта',
+    visualMetaphor: 'Папка накладных документов, звенья логистической цепи и расчет себестоимости грузоперевозок',
+    hero: 'folder',
+    bg: 'puzzle',
+    accent: 'coin',
+    palette: 'purple',
+    paletteRationale: 'Пурпурная палитра выражает стабильность логистических узлов и надежность контрактных связей',
+    intentKeywords: [
+      'логистик', 'поставк', 'склад', 'груз', 'доставк', 'цепочк', 'транспорт',
+      'фура', 'таможн', 'фрахт', 'маршрутизац', 'хаб', 'перевозк', 'снабжен',
+      'грузоперевозк', 'отгрузк', 'инвентаризац', 'порты',
+      'supply', 'chain', 'logistics', 'warehouse', 'freight', 'cargo', 'delivery'
+    ],
+    intentTags: ['Цепочки поставок', 'Складская логистика', 'Грузоперевозки', 'Оптимизация логистики'],
+    discriminators: ['логистик', 'склад', 'поставк', 'груз', 'доставк', 'фрахт']
+  },
+
+  // 15. Дизайн и креативное мышление (Puzzle + Notebook + Pen)
+  {
+    id: 'design_creative',
+    title: 'Дизайн и креативное мышление',
+    description: 'Эскизный блокнот, кусочки головоломки и инструмент отрисовки (Card 6 студии)',
+    editorialConcept: 'Графический и продуктовый дизайн, генерация визуальных идей, дизайн-системы и проектирование',
+    visualMetaphor: 'Эскизный блокнот, составные части визуального пазла и перьевая ручка для точной отрисовки',
+    hero: 'notebook',
+    bg: 'puzzle',
+    accent: 'pen',
+    palette: 'purple',
+    paletteRationale: 'Творческий пурпур — канонический цвет графического искусства, формы и эстетики',
+    intentKeywords: [
+      'дизайн', 'креатив', 'айдентик', 'эскиз', 'визуал', 'прототип', 'композици',
+      'стил', 'типографик', 'логотип', 'арт', 'концепт', 'иллюстрац', 'пазл',
+      'скетч', 'макет', 'художник', 'figma', 'сетк', 'цветов', 'перо',
+      'design', 'creative', 'visual', 'prototype', 'sketch', 'style', 'art', 'layout'
+    ],
+    intentTags: ['Графический дизайн', 'Креативное мышление', 'Айдентика брендов', 'Прототипирование'],
+    discriminators: ['дизайн', 'креатив', 'айдентик', 'эскиз', 'прототип', 'логотип']
+  },
+
+  // 16. Наука и исследования (Notebook + Lamp + Puzzle)
+  {
+    id: 'science_research',
+    title: 'Наука и исследования',
+    description: 'Журнал исследований под светом лампы и несобранная модель гипотезы',
+    editorialConcept: 'Фундаментальные научные исследования, академические гипотезы, доказательства и открытия',
+    visualMetaphor: 'Журнал лабораторных исследований под лампой и сложная научная задача-пазл',
+    hero: 'notebook',
+    bg: 'lamp',
+    accent: 'puzzle',
+    palette: 'purple',
+    paletteRationale: 'Сдержанный академический пурпур подчеркивает интеллектуальную строгость и глубину мысли',
+    intentKeywords: [
+      'наук', 'исследован', 'учен', 'лаборатор', 'гипотез', 'эксперимент', 'открыти',
+      'диссертац', 'физик', 'биолог', 'математик', 'данн', 'теоретик', 'публикац',
+      'академическ', 'формул', 'научн', 'институт',
+      'science', 'research', 'experiment', 'laboratory', 'hypothesis', 'study', 'scientific'
+    ],
+    intentTags: ['Фундаментальная наука', 'Академические исследования', 'Эксперименты', 'Научные открытия'],
+    discriminators: ['наук', 'исследован', 'лаборатор', 'гипотез', 'эксперимент', 'учен']
+  },
+
+  // 17. Электронная коммерция и ритейл (Phone + Wallet + Coin)
+  {
+    id: 'ecommerce_retail',
+    title: 'Электронная коммерция и ритейл',
+    description: 'Платежный кошелек, витрина маркетплейса на телефоне и монета покупки',
+    editorialConcept: 'Электронная коммерция, онлайн-маркетплейсы, интернет-магазины и омниканальные продажи',
+    visualMetaphor: 'Кошелек для онлайн-оплаты, витрина маркетплейса на смартфоне и монета успешной транзакции',
+    hero: 'wallet',
+    bg: 'phone',
+    accent: 'coin',
+    palette: 'peach',
+    paletteRationale: 'Персиковая гамма создает доверительную атмосферу покупок, шопинга и комфорта сервиса',
+    intentKeywords: [
+      'коммерц', 'ритейл', 'магазин', 'маркетплейс', 'покупк', 'продаж', 'товар',
+      'оплат', 'шопинг', 'чек', 'корзин', 'wildberries', 'ozon', 'заказ',
+      'дропшиппинг', 'курьер', 'витрин', 'клиент', 'мерчант',
+      'ecommerce', 'retail', 'shop', 'store', 'marketplace', 'buy', 'sale', 'cart'
+    ],
+    intentTags: ['Электронная коммерция', 'Маркетплейсы', 'Онлайн-продажи', 'Платежные шлюзы'],
+    discriminators: ['ритейл', 'маркетплейс', 'шопинг', 'покупк', 'магазин', 'товар', 'корзин']
+  },
+
+  // 18. Менеджмент и планирование (Folder + Pen + Coin)
+  {
+    id: 'management_planning',
+    title: 'Менеджмент и планирование',
+    description: 'Папка дорожной карты проектов, ручка руководителя и монета бюджетирования',
+    editorialConcept: 'Стратегический менеджмент, операционное планирование, распределение ресурсов и дедлайны',
+    visualMetaphor: 'Папка дорожной карты проектов, перьевая ручка для визирования планов и монета бюджетирования задач',
+    hero: 'folder',
+    bg: 'pen',
+    accent: 'coin',
+    palette: 'purple',
+    paletteRationale: 'Глубокий пурпур символизирует стратегическое лидерство, ответственность и выверенность решений',
+    intentKeywords: [
+      'менеджмент', 'управлен', 'планирован', 'руководител', 'лидерств', 'проект',
+      'дедлайн', 'команд', 'задач', 'план', 'ресурс', 'okr', 'agile', 'стратеги',
+      'делегирован', 'митинг', 'спринт', 'roadmap', 'директор',
+      'management', 'planning', 'manager', 'leadership', 'project', 'strategy', 'deadline'
+    ],
+    intentTags: ['Операционный менеджмент', 'Управление проектами', 'Стратегическое планирование', 'Лидерство'],
+    discriminators: ['менеджмент', 'управлен', 'планирован', 'дедлайн', 'лидерств', 'руководител']
+  },
+
+  // 19. Подкасты и медиа (Headphones + Phone + Lamp)
+  {
+    id: 'podcasts_media',
+    title: 'Подкасты и медиа',
+    description: 'Студийные мониторные наушники, свет лампы студии и смартфон записи',
+    editorialConcept: 'Индустрия разговорных подкастов, радиоэфиры, студийная звукозапись и цифровой контент',
+    visualMetaphor: 'Профессиональные мониторные наушники, свет студийной лампы и смартфон эфира',
+    hero: 'headphones',
+    bg: 'lamp',
+    accent: 'phone',
+    palette: 'mint',
+    paletteRationale: 'Современный мятный колорит придает композиции медийную выразительность и студийную чистоту',
+    intentKeywords: [
+      'подкаст', 'эфир', 'микрофон', 'радио', 'студи', 'запис', 'интервью',
+      'ведущ', 'голос', 'выпуск', 'слушател', 'стрим', 'шоу', 'медиа',
+      'спикер', 'диктор', 'контент', 'youtube', 'spotify',
+      'podcast', 'stream', 'studio', 'mic', 'broadcast', 'interview', 'voice', 'episode'
+    ],
+    intentTags: ['Подкастинг', 'Студийная звукозапись', 'Разговорные медиа', 'Цифровое вещание'],
+    discriminators: ['подкаст', 'интервью', 'микрофон', 'эфир', 'диктор', 'радио']
+  },
+
+  // 20. Саморазвитие и продуктивность (Notebook + Flowers + Pen)
+  {
+    id: 'self_development',
+    title: 'Саморазвитие и продуктивность',
+    description: 'Дневник утренних страниц, цветущие тюльпаны обновления и ручка для инсайтов',
+    editorialConcept: 'Личностный рост, осознанность, трекинг полезных привычек, утренние ритуалы и ментальный баланс',
+    visualMetaphor: 'Дневник утренних страниц, цветущие тюльпаны обновления и ручка для фиксации инсайтов',
+    hero: 'notebook',
+    bg: 'flowers',
+    accent: 'pen',
+    palette: 'peach',
+    paletteRationale: 'Теплый персик транслирует бережное отношение к себе, гармонию и внутреннее вдохновение',
+    intentKeywords: [
+      'саморазвити', 'продуктивност', 'привычк', 'осознанност', 'мотиваци', 'цел',
+      'рост', 'дневник', 'ментальн', 'гармони', 'утро', 'фокус', 'успех',
+      'медитац', 'баланс', 'дисциплин', 'ритуал', 'вдохновен',
+      'mindfulness', 'habits', 'productivity', 'goals', 'growth', 'motivation', 'focus'
+    ],
+    intentTags: ['Личностный рост', 'Осознанность и mindfulness', 'Трекинг привычек', 'Ментальное здоровье'],
+    discriminators: ['саморазвити', 'осознанност', 'привычк', 'личностн', 'мотиваци']
+  }
+];
+
+/**
+ * 5 Visible Quick-Launch Presets displayed in the UI Sidebar.
+ * The other 15 remain seamlessly accessible and dynamically selected by AI semantic similarity!
+ */
 export const PRESET_THEMES: PresetTheme[] = [
+  {
+    title: 'Музыка и отдых',
+    description: 'Наушники на первом плане и ваза с цветами в фоне (эталон студии)',
+    prompt: 'музыка отдых релакс треки звук гармония акустика',
+    palette: 'mint'
+  },
+  {
+    title: 'Личные финансы и бюджет',
+    description: 'Кожаный кошелек, монета на переднем плане и фоновая лампа (эталон студии)',
+    prompt: 'личные финансы деньги кошелек бюджет инвестиции сбережения капитал',
+    palette: 'peach'
+  },
   {
     title: 'Журналистика и писательство',
     description: 'Открытый блокнот, настольная лампа в фоне и ручка перед разворотом (референс студии)',
@@ -24,33 +503,15 @@ export const PRESET_THEMES: PresetTheme[] = [
     palette: 'purple'
   },
   {
-    title: 'Личные финансы и бюджет',
-    description: 'Кожаный кошелек, монета на переднем плане и фоновая лампа (эталон студии)',
-    prompt: 'личные финансы деньги кошелек бюджет инвестиции сбережения',
-    palette: 'peach'
-  },
-  {
-    title: 'Конспекты и IT-продуктивность',
-    description: 'Открытый блокнот и смартфон на развороте (эталон студии)',
-    prompt: 'конспекты учеба продуктивность фокус приложение мобилка',
-    palette: 'peach'
-  },
-  {
-    title: 'Музыка и отдых',
-    description: 'Наушники на первом плане и ваза с цветами в фоне (эталон студии)',
-    prompt: 'музыка отдых релакс треки подкаст ваза цветы звук',
+    title: 'IT-стартап и разработка',
+    description: 'Смартфон с мобильным приложением и пазлы архитектуры под лампой',
+    prompt: 'стартап технологии приложение код сборка пазл разработка saas',
     palette: 'mint'
   },
   {
-    title: 'IT-стартап и продукт',
-    description: 'Смартфон с мобильным приложением и пазлы сборки архитектуры',
-    prompt: 'стартап технологии приложение код сборка пазл разработка',
-    palette: 'mint'
-  },
-  {
-    title: 'Рабочее пространство и документы',
+    title: 'Рабочее пространство и порядок',
     description: 'Папка документов, ручка для подписи и настольная лампа в фоне',
-    prompt: 'документы папка договор подпись работа офис регламент',
+    prompt: 'документы папка договор подпись работа офис регламент порядок',
     palette: 'purple'
   }
 ];
@@ -73,70 +534,7 @@ export const NATURAL_COMPANIONS: Record<string, { bg: string | null; accent: str
 };
 
 /**
- * Rich Russian & English semantic keyword map with broad root-stem coverage.
- */
-const RICH_SEMANTIC_KEYWORDS: Record<string, string[]> = {
-  notebook: [
-    'журнал', 'писател', 'автор', 'книг', 'блокнот', 'конспект', 'стать', 'текст',
-    'заметк', 'рукопис', 'чтени', 'библиот', 'учеб', 'лекци', 'диплом', 'реферат',
-    'дневник', 'сценар', 'публикац', 'литератур', 'тетрад', 'запис', 'копирайт',
-    'редактор', 'пресса', 'медиа', 'издательств', 'поэзи', 'стих', 'эссе', 'книжк',
-    'book', 'notebook', 'notes', 'write', 'author', 'article', 'essay', 'journal'
-  ],
-  pen: [
-    'ручк', 'стилус', 'подпис', 'автограф', 'писат', 'чернил', 'перо', 'договор',
-    'контракт', 'соглашен', 'бланк', 'роспис', 'канцеляр', 'карандаш',
-    'pen', 'pencil', 'stylus', 'signature', 'sign', 'ink'
-  ],
-  phone: [
-    'телефон', 'смартфон', 'айфон', 'мобил', 'приложен', 'звонок', 'чат', 'мессенджер',
-    'экран', 'интерфейс', 'девайс', 'связ', 'гаджет', 'соцсет',
-    'ios', 'android', 'app', 'ui', 'ux', 'phone', 'mobile', 'screen', 'device'
-  ],
-  puzzle: [
-    'пазл', 'архитектур', 'модул', 'компонент', 'логик', 'алгоритм', 'стратеги',
-    'иде', 'сборк', 'решен', 'задач', 'структур', 'концепт', 'схем', 'систем',
-    'интеграц', 'кусоч', 'пазлы', 'головоломк', 'составн', 'конструктор',
-    'puzzle', 'logic', 'architecture', 'module', 'component', 'piece'
-  ],
-  wallet: [
-    'кошелек', 'деньг', 'финанс', 'бюджет', 'оплат', 'счет', 'наличн', 'зарплат',
-    'доход', 'расход', 'эконом', 'портмоне', 'трат', 'карт', 'банк', 'платеж',
-    'капитал', 'сбережен', 'деньж', 'рубл', 'доллар', 'евро', 'кеш', 'валют',
-    'wallet', 'money', 'finance', 'budget', 'cash', 'payment', 'salary', 'wealth'
-  ],
-  coin: [
-    'монет', 'крипт', 'биткоин', 'токен', 'инвестиц', 'процент', 'вклад', 'сейф',
-    'защит', 'безопасн', 'замок', 'криптовалют', 'блокчейн', 'накоплен', 'копейк',
-    'coin', 'crypto', 'token', 'bitcoin', 'investment', 'savings', 'lock', 'security'
-  ],
-  headphones: [
-    'наушник', 'музык', 'звук', 'аудио', 'подкаст', 'трек', 'ритм', 'бит', 'релакс',
-    'отдых', 'фокус', 'концентрац', 'тишин', 'мелоди', 'плейлист', 'слушат', 'акустик',
-    'гарнитур', 'песн', 'вокал', 'радио', 'голос',
-    'headphones', 'music', 'sound', 'audio', 'podcast', 'beats', 'track', 'relax'
-  ],
-  lamp: [
-    'ламп', 'свет', 'освещен', 'рабоч', 'стол', 'вечер', 'уют', 'кабинет', 'деск',
-    'дизайн', 'светильник', 'ночник', 'комнат', 'рабочее мест', 'офис',
-    'lamp', 'light', 'desk', 'workspace', 'evening', 'cozy', 'interior'
-  ],
-  flowers: [
-    'цвет', 'ваз', 'тюльпан', 'букет', 'флористик', 'весн', 'природ', 'красот',
-    'подарок', 'праздник', 'настроен', 'декор', 'уют', 'жизн', 'любов', 'эстетик',
-    'растени', 'комнатн', 'зелен', 'лепест',
-    'flowers', 'vase', 'bouquet', 'tulips', 'spring', 'gift', 'nature', 'beauty'
-  ],
-  folder: [
-    'папк', 'документ', 'бумаг', 'дело', 'отчет', 'архив', 'файл', 'проект',
-    'документац', 'бухгалтер', 'юриспруденц', 'прав', 'закон', 'регламент', 'досье',
-    'делопроизводств', 'папка с файл', 'канцеляри',
-    'folder', 'document', 'documents', 'archive', 'report', 'files', 'legal', 'case'
-  ]
-};
-
-/**
- * Deterministic string hash for consistent results.
+ * Deterministic string hash for consistent fallback distributions.
  */
 function hashString(str: string): number {
   let hash = 0;
@@ -145,6 +543,57 @@ function hashString(str: string): number {
     hash |= 0;
   }
   return Math.abs(hash);
+}
+
+/**
+ * Normalizes text, strips punctuation, and extracts tokens.
+ */
+function tokenize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-zа-яё0-9\s-]/gi, ' ')
+    .split(/[\s-]+/)
+    .map(w => w.trim())
+    .filter(w => w.length > 1);
+}
+
+/**
+ * Fast inflectional stemmer for Russian and English words.
+ */
+function stemWord(word: string): string {
+  if (word.length <= 3) return word;
+
+  const ruSuffixes = [
+    /ический$/, /ческого$/, /ческая$/, /скими$/, /ский$/,
+    /овать$/, /евать$/,
+    /ация$/, /ации$/, /ацию$/, /ацией$/,
+    /ение$/, /ения$/, /ению$/, /ением$/, /ении$/,
+    /ость$/, /ости$/, /остью$/,
+    /ство$/, /ства$/, /ству$/, /ством$/,
+    /ный$/, /ная$/, /ное$/, /ные$/, /ных$/, /ным$/, /ной$/,
+    /тый$/, /тая$/, /тое$/, /тые$/,
+    /ами$/, /ями$/,
+    /ов$/, /ев$/, /ей$/,
+    /ом$/, /ем$/, /ам$/, /ям$/,
+    /ах$/, /ях$/,
+    /ой$/, /ей$/, /ий$/, /ый$/, /ая$/, /яя$/, /ое$/, /ее$/,
+    /а$/, /е$/, /и$/, /о$/, /у$/, /ы$/, /я$/
+  ];
+
+  for (const re of ruSuffixes) {
+    if (word.length > 5 && re.test(word)) {
+      return word.replace(re, '');
+    }
+  }
+
+  const enSuffixes = [/ing$/, /tion$/, /ment$/, /ness$/, /able$/, /ies$/, /es$/, /ed$/, /er$/, /al$/, /s$/];
+  for (const re of enSuffixes) {
+    if (word.length > 4 && re.test(word)) {
+      return word.replace(re, '');
+    }
+  }
+
+  return word;
 }
 
 /**
@@ -195,17 +644,27 @@ export function fitAndCenterScene(
   }));
 }
 
+interface PlacedRaw {
+  type: string;
+  state: 'main' | 'bg';
+  x: number;
+  y: number;
+  scale: number;
+  rot: number;
+  zIndex: number;
+}
+
 /**
  * Builds authentic Studio Ochen isometric desk compositions.
- * Implements the 6 iconic studio layout archetypes:
- * 1. Notebook + Phone (book bleeding top/left, phone resting on right page)
- * 2. Wallet + Coin + Folder (folder bleeding top-right, wallet foreground, coin on desk)
- * 3. Flowers + Headphones (flowers bleeding top-left, headphones foreground focus)
- * 4. Lamp + Wallet + Coin (lamp bleeding top, wallet foreground, coin along 30 deg axis)
- * 5. Notebook + Puzzle + Pen (notebook bleeding top-right, puzzle on left page, pen foreground)
- * 6. Phone + Puzzle (phone lower-left, puzzle upper-right)
+ * Implements the iconic studio layout archetypes with 30-degree isometric grid alignment:
+ * 1. Notebook archetype (User Image 3, Card 2, Card 6)
+ * 2. Wallet archetype (Card 3, Card 5 with no lamp base collision)
+ * 3. Headphones archetype (Card 4)
+ * 4. Phone archetype (Card 1)
+ * 5. Folder archetype
+ * 6. Lamp / Floral / Modular archetypes
  *
- * Elements are scaled at authentic desktop scale (~0.80..0.85) without artificial bounding-box squashing.
+ * Elements are scaled at authentic desktop scale (~0.80..1.08) without artificial squashing.
  * Background objects naturally bleed over card borders, creating a high-end editorial isometric framing.
  */
 export function buildIsometricScene(
@@ -240,27 +699,15 @@ export function buildIsometricScene(
     sy = 0.85;
   }
 
-  interface PlacedRaw {
-    type: string;
-    state: 'main' | 'bg';
-    x: number;
-    y: number;
-    scale: number;
-    rot: number;
-    zIndex: number;
-  }
-
   const placed: PlacedRaw[] = [];
 
   // ARCHETYPE 1: Notebook
-  if (heroKey === 'notebook' || bgKey === 'notebook') {
-    const isHeroNotebook = heroKey === 'notebook';
-
-    if (accentKey === 'phone' || (!accentKey && heroKey === 'notebook' && bgKey === 'phone')) {
+  if (heroKey === 'notebook') {
+    if (accentKey === 'phone' || bgKey === 'phone') {
       // Studio Card 2: Book in background/center + Phone on right page
       placed.push({
         type: 'notebook',
-        state: isHeroNotebook ? 'main' : 'bg',
+        state: 'main',
         x: Math.round(cx - 100 * sx),
         y: Math.round(cy - 20 * sy),
         scale: Number((s * 1.02).toFixed(4)),
@@ -276,7 +723,8 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 2
       });
-      if (bgKey === 'lamp') {
+      const third = bgKey !== 'phone' ? bgKey : accentKey !== 'phone' ? accentKey : null;
+      if (third === 'lamp') {
         placed.push({
           type: 'lamp',
           state: 'bg',
@@ -286,12 +734,32 @@ export function buildIsometricScene(
           rot: 0,
           zIndex: 0
         });
+      } else if (third === 'pen') {
+        placed.push({
+          type: 'pen',
+          state: 'main',
+          x: Math.round(cx - 160 * sx),
+          y: Math.round(cy + 280 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      } else if (third) {
+        placed.push({
+          type: third,
+          state: 'bg',
+          x: Math.round(cx - 230 * sx),
+          y: Math.round(cy - 210 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 0
+        });
       }
-    } else if (accentKey === 'puzzle') {
-      // Studio Card 6: Book bleeding top-right + Puzzle on left page + Pen foreground
+    } else if (accentKey === 'puzzle' || bgKey === 'puzzle') {
+      // Studio Card 6 / Scenario 15 & 16: Book bleeding top-right + Puzzle on left page
       placed.push({
         type: 'notebook',
-        state: isHeroNotebook ? 'main' : 'bg',
+        state: 'main',
         x: Math.round(cx + 160 * sx),
         y: Math.round(cy - 100 * sy),
         scale: Number((s * 1.02).toFixed(4)),
@@ -307,17 +775,40 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 2
       });
-      placed.push({
-        type: 'pen',
-        state: 'main',
-        x: Math.round(cx - 160 * sx),
-        y: Math.round(cy + 300 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 3
-      });
+      const thirdKey = bgKey === 'puzzle' ? accentKey : bgKey;
+      if (thirdKey === 'lamp') {
+        placed.push({
+          type: 'lamp',
+          state: 'bg',
+          x: Math.round(cx - 230 * sx),
+          y: Math.round(cy - 210 * sy),
+          scale: Number((s * 1.03).toFixed(4)),
+          rot: 0,
+          zIndex: 0
+        });
+      } else if (thirdKey === 'pen' || !thirdKey) {
+        placed.push({
+          type: 'pen',
+          state: 'main',
+          x: Math.round(cx - 160 * sx),
+          y: Math.round(cy + 300 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      } else {
+        placed.push({
+          type: thirdKey,
+          state: 'main',
+          x: Math.round(cx - 160 * sx),
+          y: Math.round(cy + 300 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      }
     } else if (bgKey === 'lamp') {
-      // User Layout (Image 3): Lamp upper-left + Notebook lower-right foreground + Pen along lower-left edge
+      // User Reference Layout (Image 3): Lamp upper-left + Notebook lower-right foreground + Pen/Accent along lower edge
       placed.push({
         type: 'lamp',
         state: 'bg',
@@ -342,12 +833,12 @@ export function buildIsometricScene(
         state: 'main',
         x: Math.round(cx - 160 * sx),
         y: Math.round(cy + 360 * sy),
-        scale: Number(s.toFixed(4)),
+        scale: Number((penAccent === 'flowers' ? s * 0.88 : s).toFixed(4)),
         rot: 0,
         zIndex: 2
       });
     } else {
-      // Notebook + Pen in foreground + optional Flower/other bg
+      // Notebook + Accent in foreground + optional Flower/other bg
       placed.push({
         type: 'notebook',
         state: 'main',
@@ -367,9 +858,9 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 2
       });
-      if (bgKey === 'flowers') {
+      if (bgKey) {
         placed.push({
-          type: 'flowers',
+          type: bgKey,
           state: 'bg',
           x: Math.round(cx - 240 * sx),
           y: Math.round(cy - 200 * sy),
@@ -412,7 +903,7 @@ export function buildIsometricScene(
         zIndex: 3
       });
     } else if (bgKey === 'lamp') {
-      // Studio Card 5: Lamp upper-left + Wallet lower-center + Coin right (no overlap on lamp base!)
+      // Studio Card 5: Lamp upper-left + Wallet lower-center + Coin right (no lamp base collision!)
       placed.push({
         type: 'lamp',
         state: 'bg',
@@ -475,7 +966,7 @@ export function buildIsometricScene(
   // ARCHETYPE 3: Headphones
   } else if (heroKey === 'headphones') {
     if (bgKey === 'flowers' || !bgKey) {
-      // Studio Card 4: Flowers bleeding top-left + Headphones foreground
+      // Studio Card 4: Flowers bleeding top-left + Headphones foreground focus
       placed.push({
         type: 'flowers',
         state: 'bg',
@@ -494,13 +985,13 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 2
       });
-      if (accentKey === 'puzzle') {
+      if (accentKey) {
         placed.push({
-          type: 'puzzle',
+          type: accentKey,
           state: 'main',
-          x: Math.round(cx - 80 * sx),
-          y: Math.round(cy + 280 * sy),
-          scale: Number((s * 0.85).toFixed(4)),
+          x: Math.round(cx + 200 * sx),
+          y: Math.round(cy - 60 * sy),
+          scale: Number((s * 0.88).toFixed(4)),
           rot: 0,
           zIndex: 3
         });
@@ -556,6 +1047,17 @@ export function buildIsometricScene(
           zIndex: 1
         });
       }
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx + 200 * sx),
+          y: Math.round(cy - 60 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      }
     }
 
   // ARCHETYPE 4: Phone
@@ -580,23 +1082,13 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 1
       });
-      if (bgKey === 'lamp') {
+      if (bgKey && bgKey !== 'puzzle') {
         placed.push({
-          type: 'lamp',
+          type: bgKey,
           state: 'bg',
           x: Math.round(cx - 230 * sx),
-          y: Math.round(cy - 220 * sy),
-          scale: Number((s * 1.03).toFixed(4)),
-          rot: 0,
-          zIndex: 0
-        });
-      } else if (bgKey === 'flowers') {
-        placed.push({
-          type: 'flowers',
-          state: 'bg',
-          x: Math.round(cx - 240 * sx),
-          y: Math.round(cy - 200 * sy),
-          scale: Number(s.toFixed(4)),
+          y: Math.round(cy - 210 * sy),
+          scale: Number((bgKey === 'lamp' ? s * 1.03 : s).toFixed(4)),
           rot: 0,
           zIndex: 0
         });
@@ -646,32 +1138,21 @@ export function buildIsometricScene(
       rot: 0,
       zIndex: 1
     });
-    if (accentKey === 'pen') {
+
+    const companions = [bgKey, accentKey].filter(Boolean) as string[];
+    const hasPen = companions.includes('pen');
+    const hasCoin = companions.includes('coin');
+    const hasLamp = companions.includes('lamp');
+    const hasNotebook = companions.includes('notebook');
+    const hasPuzzle = companions.includes('puzzle');
+
+    if (hasPen && hasCoin) {
+      // Scenario 18: Management & Planning (Folder + Pen + Coin)
       placed.push({
         type: 'pen',
         state: 'main',
-        x: Math.round(cx),
-        y: Math.round(cy + 280 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 2
-      });
-    } else if (accentKey === 'coin') {
-      placed.push({
-        type: 'coin',
-        state: 'main',
-        x: Math.round(cx + 120 * sx),
-        y: Math.round(cy + 240 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 3
-      });
-    } else if (accentKey === 'wallet') {
-      placed.push({
-        type: 'wallet',
-        state: 'main',
-        x: Math.round(cx - 200 * sx),
-        y: Math.round(cy + 180 * sy),
+        x: Math.round(cx - 80 * sx),
+        y: Math.round(cy + 220 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 2
@@ -679,14 +1160,14 @@ export function buildIsometricScene(
       placed.push({
         type: 'coin',
         state: 'main',
-        x: Math.round(cx + 120 * sx),
-        y: Math.round(cy + 240 * sy),
+        x: Math.round(cx + 140 * sx),
+        y: Math.round(cy + 220 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 3
       });
-    }
-    if (bgKey === 'lamp') {
+    } else if (hasLamp) {
+      // Scenario 5: Workspace & Order (Folder + Lamp + Pen)
       placed.push({
         type: 'lamp',
         state: 'bg',
@@ -696,6 +1177,82 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 0
       });
+      const third = companions.find(k => k !== 'lamp') || 'pen';
+      placed.push({
+        type: third,
+        state: 'main',
+        x: Math.round(cx),
+        y: Math.round(cy + 280 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 2
+      });
+    } else if (hasNotebook) {
+      // Scenario 8: Law & Contracts (Folder + Notebook + Pen)
+      placed.push({
+        type: 'notebook',
+        state: 'bg',
+        x: Math.round(cx - 220 * sx),
+        y: Math.round(cy - 180 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 0
+      });
+      const third = companions.find(k => k !== 'notebook') || 'pen';
+      placed.push({
+        type: third,
+        state: 'main',
+        x: Math.round(cx),
+        y: Math.round(cy + 280 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 2
+      });
+    } else if (hasPuzzle) {
+      // Scenario 14: Logistics & Supply (Folder + Puzzle + Coin)
+      placed.push({
+        type: 'puzzle',
+        state: 'bg',
+        x: Math.round(cx - 220 * sx),
+        y: Math.round(cy - 180 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 0
+      });
+      const third = companions.find(k => k !== 'puzzle') || 'coin';
+      placed.push({
+        type: third,
+        state: 'main',
+        x: Math.round(cx + 120 * sx),
+        y: Math.round(cy + 240 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 2
+      });
+    } else {
+      // General fallback
+      if (bgKey) {
+        placed.push({
+          type: bgKey,
+          state: 'bg',
+          x: Math.round(cx - 220 * sx),
+          y: Math.round(cy - 180 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 0
+        });
+      }
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx),
+          y: Math.round(cy + 280 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+      }
     }
 
   // ARCHETYPE 6: Lamp (as Hero)
@@ -781,170 +1338,234 @@ export function buildIsometricScene(
 }
 
 /**
- * Dynamically analyzes ANY user prompt, extracts semantic keywords,
- * ranks all 10 objects, and produces a laconic 2-3 object composition.
+ * Generative Intelligence Semantic Scoring Engine.
+ * Evaluates user prompt against 20 rich knowledge-base scenarios, extracts semantic markers,
+ * matches highest-affinity concepts, and composes an authentic Studio Ochen scene.
  */
 export function generateCompositionFromPrompt(
   prompt: string,
   format: CanvasFormat,
   detailSize: DetailSize = 'L'
 ): AICompositionResult {
-  const pLower = prompt.toLowerCase().trim();
+  const pRaw = prompt.trim();
+  const pLower = pRaw.toLowerCase();
+  const tokens = tokenize(pLower);
+  const stems = tokens.map(stemWord);
 
-  // 1. Semantic scoring across all 10 library objects with rich stem dictionary
-  const scores: Record<string, { score: number; matchedWords: string[] }> = {};
+  // 1. Detect explicit mentions of library objects using Russian & English root map
+  const OBJECT_ROOT_MAP: Record<string, string[]> = {
+    phone: ['телефон', 'смартфон', 'айфон', 'phone', 'mobile'],
+    notebook: ['блокнот', 'тетрад', 'книг', 'notebook', 'book'],
+    headphones: ['наушник', 'гарнитур', 'headphones'],
+    folder: ['папк', 'досье', 'folder'],
+    wallet: ['кошел', 'портмоне', 'wallet'],
+    coin: ['монет', 'копейк', 'криптомонет', 'coin'],
+    puzzle: ['пазл', 'головоломк', 'puzzle'],
+    lamp: ['ламп', 'светильник', 'lamp'],
+    flowers: ['цветы', 'цветок', 'цветочки', 'цветочек', 'ваза', 'тюльпан', 'букет', 'flowers', 'flower', 'vase'],
+    pen: ['ручк', 'стилус', 'перо', 'карандаш', 'pen']
+  };
 
-  for (const [key, stems] of Object.entries(RICH_SEMANTIC_KEYWORDS)) {
-    scores[key] = { score: 0, matchedWords: [] };
-
-    // Check direct object name or Russian label
-    const meta = OBJECT_CATALOG[key];
-    if (pLower.includes(key) || (meta && pLower.includes(meta.labelRu.toLowerCase()))) {
-      scores[key].score += 25;
-      scores[key].matchedWords.push(meta?.labelRu || key);
-    }
-
-    // Check rich stems
-    for (const stem of stems) {
-      if (pLower.includes(stem)) {
-        scores[key].score += 10;
-        if (!scores[key].matchedWords.includes(stem)) {
-          scores[key].matchedWords.push(stem);
+  const explicitObjects: string[] = [];
+  for (const [key, roots] of Object.entries(OBJECT_ROOT_MAP)) {
+    let matched = false;
+    for (const r of roots) {
+      if (tokens.some(t => t === r || t.startsWith(r))) {
+        // Special guard: do not confuse flower words with color adjectives (цветовой, цветокоррекция)
+        if (key === 'flowers') {
+          const hasFlowerToken = tokens.some(t =>
+            ['цветы', 'цветок', 'цветочки', 'цветочек', 'ваза', 'вазу', 'вазе', 'вазы', 'тюльпан', 'тюльпаны', 'букет', 'букеты', 'flowers', 'flower', 'vase'].includes(t)
+          );
+          if (!hasFlowerToken) continue;
         }
+        matched = true;
+        break;
       }
+    }
+    if (matched) {
+      explicitObjects.push(key);
     }
   }
 
-  const sorted = Object.entries(scores).sort((a, b) => b[1].score - a[1].score);
-  const matched = sorted.filter(([_, s]) => s.score > 0);
-  const allDetectedTags = Array.from(
-    new Set(sorted.flatMap(([_, s]) => s.matchedWords))
-  );
+  // 2. Score across all 20 scenarios
+  interface ScenarioScore {
+    scenario: AIScenario;
+    score: number;
+    matchedKeywords: string[];
+  }
 
-  let heroKey = '';
-  let bgKey: string | null = null;
-  let accentKey: string | null = null;
+  const scoredScenarios: ScenarioScore[] = AI_SCENARIOS.map(sc => {
+    let score = 0;
+    const matchedKeywords: string[] = [];
 
-  if (matched.length > 0) {
-    const matchedKeys = matched.map(([k]) => k);
-
-    // Primary candidates for hero role
-    const primaryCandidates = matchedKeys.filter(k =>
-      ['notebook', 'wallet', 'phone', 'headphones', 'folder'].includes(k)
-    );
-
-    if (primaryCandidates.length > 0) {
-      heroKey = primaryCandidates[0];
-    } else {
-      heroKey = matchedKeys[0];
-    }
-
-    // Assign background object
-    const hasLamp = matchedKeys.includes('lamp');
-    const hasFlowers = matchedKeys.includes('flowers');
-    const hasFolder = matchedKeys.includes('folder');
-
-    if (hasLamp && heroKey !== 'lamp') {
-      bgKey = 'lamp';
-    } else if (hasFlowers && heroKey !== 'flowers') {
-      bgKey = 'flowers';
-    } else if (hasFolder && heroKey !== 'folder') {
-      bgKey = 'folder';
-    } else if (matchedKeys.length > 1) {
-      const second = matchedKeys.find(k => k !== heroKey);
-      if (second && ['lamp', 'flowers', 'folder', 'notebook'].includes(second)) {
-        bgKey = second;
+    // Title match (high weight)
+    const titleTokens = tokenize(sc.title);
+    for (const tt of titleTokens) {
+      if (tokens.includes(tt)) {
+        score += 28;
+        matchedKeywords.push(tt);
       }
     }
 
-    // Assign accent object
-    const accentCandidate = matchedKeys.find(k =>
-      ['coin', 'pen', 'puzzle'].includes(k) && k !== heroKey && k !== bgKey
-    );
-    if (accentCandidate) {
-      accentKey = accentCandidate;
-    } else if (heroKey === 'notebook' && matchedKeys.includes('phone')) {
-      accentKey = 'phone';
-    }
-
-    // GUARANTEE: 2 to 3 objects via natural companion pairings!
-    if (!bgKey && !accentKey) {
-      const companions = NATURAL_COMPANIONS[heroKey] || { bg: 'lamp', accent: 'pen' };
-      bgKey = companions.bg;
-      accentKey = companions.accent;
-    } else if (!bgKey) {
-      // Add background if appropriate for the hero object
-      if (heroKey === 'wallet' || heroKey === 'folder' || (heroKey === 'notebook' && accentKey !== 'phone')) {
-        const companions = NATURAL_COMPANIONS[heroKey];
-        if (companions && companions.bg) {
-          bgKey = companions.bg;
+    // Direct discriminator match (extra decisive weight, token/stem-boundary safe)
+    if (sc.discriminators) {
+      for (const disc of sc.discriminators) {
+        const discLower = disc.toLowerCase();
+        const matchesToken = tokens.some(t => t === discLower || t.startsWith(discLower) || stemWord(t) === discLower);
+        if (matchesToken) {
+          score += 24;
+          if (!matchedKeywords.includes(discLower)) matchedKeywords.push(discLower);
         }
       }
     }
+
+    // Keyword & stem matches
+    for (const kw of sc.intentKeywords) {
+      const kwLower = kw.toLowerCase();
+      const kwStem = stemWord(kwLower);
+
+      let matched = false;
+      if (kwLower.includes(' ')) {
+        // Multi-word phrase matching
+        matched = pLower.includes(kwLower);
+      } else {
+        // Word-boundary token or stem match
+        matched = tokens.some(t => t === kwLower || t.startsWith(kwLower) || stemWord(t) === kwStem);
+      }
+
+      if (matched) {
+        score += 14;
+        if (!matchedKeywords.includes(kwLower)) matchedKeywords.push(kwLower);
+      }
+    }
+
+    // Intent tag overlap
+    for (const tag of sc.intentTags) {
+      const tagTokens = tokenize(tag);
+      for (const tt of tagTokens) {
+        if (tokens.includes(tt) || stems.includes(stemWord(tt))) {
+          score += 6;
+          if (!matchedKeywords.includes(tt)) matchedKeywords.push(tt);
+        }
+      }
+    }
+
+    // Object synergy: if prompt explicitly asked for hero/bg/accent
+    if (explicitObjects.includes(sc.hero)) score += 18;
+    if (sc.bg && explicitObjects.includes(sc.bg)) score += 12;
+    if (sc.accent && explicitObjects.includes(sc.accent)) score += 10;
+
+    return { scenario: sc, score, matchedKeywords };
+  });
+
+  // Sort descending by score
+  scoredScenarios.sort((a, b) => b.score - a.score);
+  const best = scoredScenarios[0];
+
+  let selectedScenario: AIScenario;
+  let isFallback = false;
+
+  if (best && best.score > 0) {
+    selectedScenario = best.scenario;
   } else {
-    // Unknown or abstract prompt: categorize intelligently
-    const hash = hashString(pLower || 'default');
-    const defaultPresets = [
-      { hero: 'notebook', bg: 'lamp', accent: 'pen' },        // Writing & desk (Universal fallback!)
-      { hero: 'wallet', bg: 'lamp', accent: 'coin' },          // Finance & commerce
-      { hero: 'phone', bg: null, accent: 'puzzle' },           // Tech & digital
-      { hero: 'headphones', bg: 'flowers', accent: null }      // Creative & audio
-    ];
-    const picked = defaultPresets[hash % defaultPresets.length];
-    heroKey = picked.hero;
-    bgKey = picked.bg;
-    accentKey = picked.accent;
+    // Abstract, gibberish or empty prompt: select scenario deterministically
+    isFallback = true;
+    const hash = hashString(pLower || 'ochen-studio-default');
+    selectedScenario = AI_SCENARIOS[hash % AI_SCENARIOS.length];
   }
 
-  // Determine palette dynamically
-  let recPalette: PaletteId = 'purple';
-  if (
-    pLower.includes('персик') ||
-    pLower.includes('тепл') ||
-    pLower.includes('деньг') ||
-    pLower.includes('финанс') ||
-    pLower.includes('банк') ||
-    pLower.includes('кошел') ||
-    pLower.includes('инвест') ||
-    heroKey === 'wallet'
-  ) {
+  // 3. Determine scene objects (with dynamic adaptation if user explicitly asked for specific objects)
+  let heroKey = selectedScenario.hero;
+  let bgKey = selectedScenario.bg;
+  let accentKey = selectedScenario.accent;
+
+  if (explicitObjects.length > 0) {
+    // If user explicitly named objects, adapt the composition while respecting the scenario's editorial role
+    if (explicitObjects.length === 1) {
+      const explicit = explicitObjects[0];
+      if (explicit !== heroKey && explicit !== bgKey && explicit !== accentKey) {
+        // Replace or pair
+        if (['lamp', 'flowers', 'folder'].includes(explicit) && !bgKey) {
+          bgKey = explicit;
+        } else if (['coin', 'pen', 'puzzle'].includes(explicit) && !accentKey) {
+          accentKey = explicit;
+        } else {
+          heroKey = explicit;
+        }
+      }
+    } else if (explicitObjects.length >= 2) {
+      const bgTypes = ['lamp', 'flowers', 'folder'];
+      const accentTypes = ['coin', 'pen', 'puzzle'];
+
+      const explicitBg = explicitObjects.find(k => bgTypes.includes(k) && k !== explicitObjects[0]);
+      const explicitAccent = explicitObjects.find(k => accentTypes.includes(k) && k !== explicitBg);
+      const explicitHero = explicitObjects.find(k => k !== explicitBg && k !== explicitAccent) || explicitObjects[0];
+
+      heroKey = explicitHero;
+      bgKey = explicitBg || (explicitObjects.length > 1 && explicitObjects[1] !== explicitHero ? explicitObjects[1] : null);
+      accentKey = explicitAccent || (explicitObjects.length > 2 && explicitObjects[2] !== explicitHero && explicitObjects[2] !== bgKey ? explicitObjects[2] : null);
+    }
+  }
+
+  // Determine palette
+  let recPalette: PaletteId = selectedScenario.palette;
+  // Dynamic palette override if user explicitly specified color words
+  if (pLower.includes('персик') || pLower.includes('тепл') || pLower.includes('peach')) {
     recPalette = 'peach';
-  } else if (
-    pLower.includes('мят') ||
-    pLower.includes('свеж') ||
-    pLower.includes('технолог') ||
-    pLower.includes('стартап') ||
-    pLower.includes('код') ||
-    pLower.includes('музык') ||
-    pLower.includes('звук') ||
-    pLower.includes('аудио') ||
-    heroKey === 'headphones'
-  ) {
+  } else if (pLower.includes('мят') || pLower.includes('свеж') || pLower.includes('mint')) {
     recPalette = 'mint';
+  } else if (pLower.includes('фиолет') || pLower.includes('пурпур') || pLower.includes('purple')) {
+    recPalette = 'purple';
   }
 
-  // Build the aligned isometric scene
+  // Build authentic isometric scene
   const finalItems = buildIsometricScene(heroKey, bgKey, accentKey, format, detailSize);
 
+  // 4. Generate professional, multi-line AI Reasoning / Rationale
   const heroLabel = OBJECT_CATALOG[heroKey]?.labelRu || heroKey;
-  const bgLabel = bgKey ? OBJECT_CATALOG[bgKey]?.labelRu : null;
-  const accentLabel = accentKey ? OBJECT_CATALOG[accentKey]?.labelRu : null;
+  const paletteName = recPalette === 'purple' ? 'Purple Mist (Фиолетовая)' : recPalette === 'peach' ? 'Warm Peach (Персиковая)' : 'Fresh Mint (Мятная)';
+
+  // Build accurate spatial description from actual finalItems
+  const bgItems = finalItems.filter(i => i.state === 'bg');
+  const mainAccents = finalItems.filter(i => i.state === 'main' && i.objectType !== heroKey);
+
+  const spatialClauses: string[] = [`✨ Пространство кадра: Главный фокус — ${heroLabel}.`];
+  if (bgItems.length > 0) {
+    const bgLabels = bgItems.map(i => OBJECT_CATALOG[i.objectType]?.labelRu || i.objectType).join(' и ');
+    spatialClauses.push(`В монохромной глубине второго плана расположен ${bgLabels} с естественным изометрическим вылетом за обрез холста (Studio Ochen 30° bleed).`);
+  }
+  if (mainAccents.length > 0) {
+    const accentLabels = mainAccents.map(i => OBJECT_CATALOG[i.objectType]?.labelRu || i.objectType).join(', ');
+    spatialClauses.push(`Акцентные предметы на переднем плане вдоль 30° изометрической оси: ${accentLabels}.`);
+  }
+  const spatialText = spatialClauses.join(' ');
+
+  const matchedMarkers = best && best.matchedKeywords.length > 0
+    ? best.matchedKeywords.slice(0, 5).join(', ')
+    : 'эвристический контекст';
 
   let rationaleText = '';
-  if (allDetectedTags.length > 0) {
-    rationaleText = `Смысловые теги: <${allDetectedTags.slice(0, 4).join(', ')}>. `;
-  }
-  rationaleText += `Главный объект: ${heroLabel} (фокус сцены).`;
-  if (bgLabel) {
-    rationaleText += ` В глубине: ${bgLabel} (монохром в тоне палитры).`;
-  }
-  if (accentLabel) {
-    rationaleText += ` Добавлен акцент: ${accentLabel}.`;
+  if (!isFallback) {
+    rationaleText = `🤖 ИИ-Анализ сценария: «${selectedScenario.title}»\n` +
+      `🎯 Контекст и смысловые маркеры: [${matchedMarkers}]. Тема интерпретирована как: ${selectedScenario.editorialConcept}.\n` +
+      `📐 Визуальная метафора: ${selectedScenario.visualMetaphor}.\n` +
+      `🎨 Колористика: Палитра ${paletteName}. ${selectedScenario.paletteRationale}.\n` +
+      spatialText;
+  } else {
+    rationaleText = `🤖 ИИ-Анализ сценария: «${selectedScenario.title}» (Сбалансированная генерация)\n` +
+      `🎯 Входной запрос не содержит явных маркеров, сгенерирован эталонный журнальный архетип: ${selectedScenario.editorialConcept}.\n` +
+      `📐 Визуальная метафора: ${selectedScenario.visualMetaphor}.\n` +
+      `🎨 Колористика: Рекомендована палитра ${paletteName}. ${selectedScenario.paletteRationale}.\n` +
+      spatialText;
   }
 
+  // Ensure matchedTheme reflects all unique objects in finalItems
+  const itemLabels = finalItems.map(it => OBJECT_CATALOG[it.objectType]?.labelRu || it.objectType);
+  const matchedTheme = Array.from(new Set(itemLabels)).join(' + ');
+
   return {
-    title: prompt,
-    matchedTheme: [heroLabel, bgLabel, accentLabel].filter(Boolean).join(' + '),
+    title: pRaw || selectedScenario.title,
+    matchedTheme,
     recommendedPalette: recPalette,
     items: finalItems,
     rationale: rationaleText
@@ -969,16 +1590,27 @@ export function generateCompositionFromComponents(
     return buildIsometricScene(hero, companions.bg, companions.accent, format, detailSize);
   }
 
-  // If 2 items selected: 1 Background + 1 Hero
+  // If 2 items selected: 1 Background + 1 Hero OR 1 Hero + 1 Accent
   if (validKeys.length === 2) {
     const bgTypes = ['lamp', 'flowers', 'folder'];
-    const isFirstBg = bgTypes.includes(validKeys[0]) && !bgTypes.includes(validKeys[1]);
-    const bg = isFirstBg ? validKeys[0] : validKeys[1];
-    const hero = isFirstBg ? validKeys[1] : validKeys[0];
-    return buildIsometricScene(hero, bg, null, format, detailSize);
+    const accentTypes = ['coin', 'pen', 'puzzle'];
+    
+    if (bgTypes.includes(validKeys[0]) && !bgTypes.includes(validKeys[1])) {
+      return buildIsometricScene(validKeys[1], validKeys[0], null, format, detailSize);
+    }
+    if (bgTypes.includes(validKeys[1]) && !bgTypes.includes(validKeys[0])) {
+      return buildIsometricScene(validKeys[0], validKeys[1], null, format, detailSize);
+    }
+    if (accentTypes.includes(validKeys[1])) {
+      return buildIsometricScene(validKeys[0], null, validKeys[1], format, detailSize);
+    }
+    if (accentTypes.includes(validKeys[0])) {
+      return buildIsometricScene(validKeys[1], null, validKeys[0], format, detailSize);
+    }
+    return buildIsometricScene(validKeys[0], validKeys[1], null, format, detailSize);
   }
 
-  // If 3+ items: Keep 3 items (Hero, Background, Accent)
+  // If 3+ items: Keep exactly 3 items (Hero, Background, Accent)
   const bgTypes = ['lamp', 'flowers', 'folder'];
   const bgCandidate = validKeys.find(k => bgTypes.includes(k)) || validKeys[1];
   const accentCandidate = validKeys.find(k => ['coin', 'pen', 'puzzle', 'phone'].includes(k) && k !== bgCandidate) || validKeys[2];

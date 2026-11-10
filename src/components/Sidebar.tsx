@@ -56,12 +56,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [libraryState, setLibraryState] = useState<ObjectState>('main');
   const [selectedLibraryKeys, setSelectedLibraryKeys] = useState<string[]>([]);
 
-  // When item is selected, smoothly open inspector tab
-  React.useEffect(() => {
-    if (selectedItem) {
+  // When an item is selected, smoothly open inspector tab
+  const [prevSelectedId, setPrevSelectedId] = useState(selectedItem?.id);
+  if (selectedItem?.id !== prevSelectedId) {
+    setPrevSelectedId(selectedItem?.id);
+    if (selectedItem?.id) {
       setActiveTab('inspector');
     }
-  }, [selectedItem?.id]);
+  }
 
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,7 +206,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Info size={13} className="text-zinc-400" />
                   <span>Логика компоновки:</span>
                 </div>
-                <p className="text-[11px] text-zinc-400 leading-relaxed">{lastAiRationale}</p>
+                <p className="text-[11px] text-zinc-400 leading-relaxed whitespace-pre-line">{lastAiRationale}</p>
               </div>
             )}
           </div>
