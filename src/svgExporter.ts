@@ -2,6 +2,7 @@ import type { CanvasFormat, CanvasItem, AssetMeta } from './types';
 import { FORMATS } from './types';
 import type { Palette } from './palettes';
 import { adaptColorToPalette } from './palettes';
+import { getBackgroundDecorSVG } from './components/BackgroundDecor';
 
 export function buildStandaloneSVG(
   items: CanvasItem[],
@@ -13,9 +14,6 @@ export function buildStandaloneSVG(
   const cfg = FORMATS[format];
   const W = cfg.width;
   const H = cfg.height;
-  const cx = W / 2;
-  const cy = H / 2;
-  const strokeColor = palette.bgDark;
 
   // Sort by zIndex
   const sortedItems = [...items].sort((a, b) => a.zIndex - b.zIndex);
@@ -37,22 +35,7 @@ export function buildStandaloneSVG(
   ];
 
   if (showDecor) {
-    const lineSpan = Math.min(360, W * 0.40);
-    const ellipseRx = Math.min(90, W * 0.12);
-    const ellipseRy = ellipseRx * 0.46;
-
-    lines.push(`    <!-- Studio Ochen Background Decorative Scratches & Accents -->`);
-    lines.push(`    <g id="background-decor">`);
-    lines.push(`      <line x1="${cx - lineSpan}" y1="${cy + lineSpan * 0.22}" x2="${cx - lineSpan * 0.15}" y2="${cy - lineSpan * 0.28}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>`);
-    lines.push(`      <line x1="${cx - lineSpan * 0.70}" y1="${cy - lineSpan * 0.45}" x2="${cx - lineSpan * 0.40}" y2="${cy - lineSpan * 0.62}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.38"/>`);
-    lines.push(`      <line x1="${cx + lineSpan * 0.35}" y1="${cy + lineSpan * 0.45}" x2="${cx + lineSpan * 0.55}" y2="${cy + lineSpan * 0.33}" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>`);
-    lines.push(`      <ellipse cx="${cx - 120}" cy="${cy - 50}" rx="${ellipseRx}" ry="${ellipseRy}" fill="${strokeColor}" opacity="0.12"/>`);
-    lines.push(`      <!-- Signature Corner Pills -->`);
-    lines.push(`      <g transform="translate(75, ${H - 65})">`);
-    lines.push(`        <ellipse cx="20" cy="22" rx="28" ry="14" fill="${strokeColor}" opacity="0.65"/>`);
-    lines.push(`        <ellipse cx="44" cy="10" rx="28" ry="14" fill="#ffffff" opacity="0.95"/>`);
-    lines.push(`      </g>`);
-    lines.push(`    </g>`);
+    lines.push(getBackgroundDecorSVG(W, H, palette));
   }
 
   lines.push(`    <!-- Composition Elements -->`);

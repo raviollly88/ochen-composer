@@ -6,6 +6,9 @@ import {
   AI_SCENARIOS,
 } from './aiComposer';
 import type { CanvasFormat } from './types';
+import { DEFAULT_PALETTES } from './palettes';
+import { getBackgroundDecorSVG } from './components/BackgroundDecor';
+import { buildStandaloneSVG } from './svgExporter';
 
 function assert(condition: boolean, msg: string) {
   if (!condition) {
@@ -317,6 +320,143 @@ console.log('--- Running Studio Ochen AI Composer Test Suite ---');
   const centered = fitAndCenterScene(res3, '16:9');
   assert(centered.length === 3, 'fitAndCenterScene should preserve items count');
   console.log('  ✓ Edge cases and dynamic adaptations verified successfully');
+}
+
+// 11. Test Clumping Prevention: Podcasts & Media Layout Matching User Reference Image 2
+{
+  console.log('Test 11: Anti-Clumping & Harmonious Negative Space (User Reference Image 2)');
+  const res = generateCompositionFromPrompt('Подкасты и медиа', '1:1', 'L');
+  assert(res.items.length === 3, `Expected 3 items in Podcasts scene, got ${res.items.length}`);
+
+  const lamp = res.items.find(i => i.objectType === 'lamp');
+  const headphones = res.items.find(i => i.objectType === 'headphones');
+  const phone = res.items.find(i => i.objectType === 'phone');
+
+  assert(!!lamp, 'Lamp must be in scene');
+  assert(!!headphones, 'Headphones must be in scene');
+  assert(!!phone, 'Phone must be in scene');
+
+  // Verify Lamp is pushed to upper-left background
+  assert(lamp!.state === 'bg', 'Lamp should be background monochrome');
+  assert(lamp!.x >= 150 && lamp!.x <= 200, `Lamp x=${lamp!.x} should be in upper-left (150..200)`);
+  assert(lamp!.y >= 140 && lamp!.y <= 200, `Lamp y=${lamp!.y} should be in upper-left (140..200)`);
+
+  // Verify Headphones is in upper-right / midground-right
+  assert(headphones!.state === 'main', 'Headphones should be main color');
+  assert(headphones!.x >= 650 && headphones!.x <= 720, `Headphones x=${headphones!.x} should be in midground-right (650..720)`);
+  assert(headphones!.y >= 480 && headphones!.y <= 540, `Headphones y=${headphones!.y} should be near midground (480..540)`);
+
+  // Verify Phone is in lower-left foreground
+  assert(phone!.state === 'main', 'Phone should be main color');
+  assert(phone!.x >= 300 && phone!.x <= 370, `Phone x=${phone!.x} should be in lower-left (300..370)`);
+  assert(phone!.y >= 780 && phone!.y <= 840, `Phone y=${phone!.y} should be in foreground (780..840)`);
+
+  // Verify Anti-Clumping Negative Space: Phone and Headphones must be spaced far apart (> 400px)
+  const dist = Math.hypot(phone!.x - headphones!.x, phone!.y - headphones!.y);
+  assert(dist > 400, `Phone and Headphones must have breathing room (>400px), got ${dist.toFixed(1)}px`);
+
+  // Also verify manual component selection with 3 items gives identical harmonious layout
+  const resManual = generateCompositionFromComponents(['headphones', 'lamp', 'phone'], '1:1', 'L');
+  const mPhone = resManual.find(i => i.objectType === 'phone')!;
+  const mHeadphones = resManual.find(i => i.objectType === 'headphones')!;
+  const manualDist = Math.hypot(mPhone.x - mHeadphones.x, mPhone.y - mHeadphones.y);
+  assert(manualDist > 400, `Manual selection must also avoid clumping (>400px), got ${manualDist.toFixed(1)}px`);
+
+  console.log('  ✓ User Reference Image 2 layout verified with >400px negative space between items');
+}
+
+// 12. Test Palette-Specific Bespoke Background Decors
+{
+  console.log('Test 12: Palette-Specific Bespoke Background Decors');
+
+  // 12a. Purple Mist (Classic Studio Ochen): soft diagonal scratches, soft shadow ellipse, white pill
+  const purpleDecor = getBackgroundDecorSVG(1000, 1000, DEFAULT_PALETTES.purple);
+  assert(purpleDecor.includes('stroke="#7764d6"'), 'Purple decor must use purple dark stroke');
+  assert(purpleDecor.includes('fill="#ffffff"'), 'Purple decor must contain crisp white pill');
+  assert(purpleDecor.includes('opacity="0.12"'), 'Purple decor must contain soft shadow ellipse');
+
+  // 12b. Warm Peach: concentric accent ring, circle dot, 30° drafting hatch marks, terracotta/cream pills
+  const peachDecor = getBackgroundDecorSVG(1000, 1000, DEFAULT_PALETTES.peach);
+  assert(peachDecor.includes('stroke="#d17431"'), 'Peach decor must use terracotta dark stroke');
+  assert(peachDecor.includes('<ellipse') && peachDecor.includes('fill="none"'), 'Peach decor must include geometric ring');
+  assert(peachDecor.includes('<circle') && peachDecor.includes('r="3"'), 'Peach decor must include concentric dot');
+  assert(peachDecor.includes('fill="#f9ebaf"'), 'Peach decor must include warm cream pill');
+
+  // 12c. Fresh Mint: dotted isometric coordinate axis, technical crosshairs, subtle tech grid accents, cyan/mint pills
+  const mintDecor = getBackgroundDecorSVG(1000, 1000, DEFAULT_PALETTES.mint);
+  assert(mintDecor.includes('stroke="#59bdbd"'), 'Mint decor must use mint dark stroke');
+  assert(mintDecor.includes('stroke-dasharray="4 6"'), 'Mint decor must include dotted coordinate axis');
+  assert(mintDecor.includes('stroke-dasharray="3 5"'), 'Mint decor must include secondary guide axis');
+  assert(mintDecor.includes('stroke-dasharray="2 6"'), 'Mint decor must include subtle tech grid accents');
+  assert(mintDecor.includes('fill="#e4f7f7"'), 'Mint decor must include cyan/mint pill');
+
+  // 12d. Verify Standalone SVG Exporter embeds the palette-specific decor
+  const mockItems = generateCompositionFromPrompt('Подкасты и медиа', '1:1', 'L').items;
+  const svgOutput = buildStandaloneSVG(mockItems, '1:1', DEFAULT_PALETTES.mint, {}, true);
+  assert(svgOutput.includes('stroke-dasharray="4 6"'), 'Exported SVG for mint must contain dotted coordinate axis');
+  assert(svgOutput.includes('stroke-dasharray="2 6"'), 'Exported SVG for mint must contain subtle tech grid accents');
+  assert(svgOutput.includes('fill="#e4f7f7"'), 'Exported SVG for mint must contain cyan/mint pill');
+
+  const svgPeach = buildStandaloneSVG(mockItems, '1:1', DEFAULT_PALETTES.peach, {}, true);
+  assert(svgPeach.includes('fill="none"'), 'Exported SVG for peach must contain geometric accent ring');
+  assert(svgPeach.includes('fill="#f9ebaf"'), 'Exported SVG for peach must contain warm cream pill');
+
+  console.log('  ✓ Bespoke background decors verified for all 3 official palettes in canvas and SVG export');
+}
+
+// 13. Test Anti-Clumping across Mobile Apps and Wallet Scenarios
+{
+  console.log('Test 13: Scenario 9 (Mobile Apps) Anti-Clumping & Wallet Spacing');
+
+  // Scenario 9: Phone + Headphones + Puzzle
+  const s9 = generateCompositionFromPrompt('Мобильные приложения и сервисы', '1:1', 'L');
+  assert(s9.items.length === 3, `Expected 3 items in Mobile Apps scene, got ${s9.items.length}`);
+  const s9Phone = s9.items.find(i => i.objectType === 'phone')!;
+  const s9Headphones = s9.items.find(i => i.objectType === 'headphones')!;
+  const s9Puzzle = s9.items.find(i => i.objectType === 'puzzle')!;
+
+  assert(!!s9Phone && !!s9Headphones && !!s9Puzzle, 'All 3 items must be in Mobile Apps');
+  const distPhoneHeadphones = Math.hypot(s9Phone.x - s9Headphones.x, s9Phone.y - s9Headphones.y);
+  assert(distPhoneHeadphones > 400, `Phone and Headphones in Scenario 9 must be spaced (>400px), got ${distPhoneHeadphones.toFixed(1)}px`);
+
+  const distPuzzleHeadphones = Math.hypot(s9Puzzle.x - s9Headphones.x, s9Puzzle.y - s9Headphones.y);
+  assert(distPuzzleHeadphones > 400, `Puzzle and Headphones in Scenario 9 must be spaced (>400px), got ${distPuzzleHeadphones.toFixed(1)}px`);
+
+  // Scenario 6: Wallet + Puzzle + Coin - Coin must not collide with wallet clasp
+  const s6 = generateCompositionFromPrompt('Кибербезопасность и защита данных', '1:1', 'L');
+  const s6Wallet = s6.items.find(i => i.objectType === 'wallet')!;
+  const s6Coin = s6.items.find(i => i.objectType === 'coin')!;
+  assert(s6Coin.y >= 700, `Coin in Scenario 6 y=${s6Coin.y} should be in foreground below wallet clasp (>=700)`);
+  const distWalletCoin = Math.hypot(s6Wallet.x - s6Coin.x, s6Wallet.y - s6Coin.y);
+  assert(distWalletCoin > 200, `Coin and wallet clasp must not collide, got ${distWalletCoin.toFixed(1)}px`);
+
+  console.log('  ✓ Anti-clumping and collision-free spacing verified for Scenario 9 and Scenario 6');
+}
+
+// 14. Test Strict Item Count & No Phantom Objects in Manual Component Selections
+{
+  console.log('Test 14: Strict Item Count (No Phantom Objects in 2-Item Selections)');
+
+  // 14a. Headphones + Phone must return EXACTLY 2 items (no phantom flowers)
+  const hpRes = generateCompositionFromComponents(['headphones', 'phone'], '1:1', 'L');
+  assert(hpRes.length === 2, `Expected exactly 2 items for [headphones, phone], got ${hpRes.length}`);
+  assert(!hpRes.some(i => i.objectType === 'flowers'), 'Must not inject phantom flowers into [headphones, phone]');
+
+  const phRes = generateCompositionFromComponents(['phone', 'headphones'], '1:1', 'L');
+  assert(phRes.length === 2, `Expected exactly 2 items for [phone, headphones], got ${phRes.length}`);
+  assert(!phRes.some(i => i.objectType === 'flowers'), 'Must not inject phantom flowers into [phone, headphones]');
+
+  // 14b. Notebook + Lamp must return EXACTLY 2 items (no phantom pen)
+  const nlRes = generateCompositionFromComponents(['notebook', 'lamp'], '1:1', 'L');
+  assert(nlRes.length === 2, `Expected exactly 2 items for [notebook, lamp], got ${nlRes.length}`);
+  assert(!nlRes.some(i => i.objectType === 'pen'), 'Must not inject phantom pen into [notebook, lamp]');
+
+  // 14c. Wallet + Lamp must return EXACTLY 2 items (no phantom coin)
+  const wlRes = generateCompositionFromComponents(['wallet', 'lamp'], '1:1', 'L');
+  assert(wlRes.length === 2, `Expected exactly 2 items for [wallet, lamp], got ${wlRes.length}`);
+  assert(!wlRes.some(i => i.objectType === 'coin'), 'Must not inject phantom coin into [wallet, lamp]');
+
+  console.log('  ✓ Strict 2-item component selections verified with 0 phantom objects');
 }
 
 console.log('--- All tests passed with 100% success! ---');

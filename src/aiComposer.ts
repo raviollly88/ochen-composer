@@ -786,7 +786,7 @@ export function buildIsometricScene(
           rot: 0,
           zIndex: 0
         });
-      } else if (thirdKey === 'pen' || !thirdKey) {
+      } else if (thirdKey === 'pen') {
         placed.push({
           type: 'pen',
           state: 'main',
@@ -796,7 +796,7 @@ export function buildIsometricScene(
           rot: 0,
           zIndex: 3
         });
-      } else {
+      } else if (thirdKey) {
         placed.push({
           type: thirdKey,
           state: 'main',
@@ -827,16 +827,17 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 1
       });
-      const penAccent = accentKey || 'pen';
-      placed.push({
-        type: penAccent,
-        state: 'main',
-        x: Math.round(cx - 160 * sx),
-        y: Math.round(cy + 360 * sy),
-        scale: Number((penAccent === 'flowers' ? s * 0.88 : s).toFixed(4)),
-        rot: 0,
-        zIndex: 2
-      });
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx - 160 * sx),
+          y: Math.round(cy + 360 * sy),
+          scale: Number((accentKey === 'flowers' ? s * 0.88 : s).toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+      }
     } else {
       // Notebook + Accent in foreground + optional Flower/other bg
       placed.push({
@@ -848,16 +849,17 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 1
       });
-      const penAccent = accentKey || 'pen';
-      placed.push({
-        type: penAccent,
-        state: 'main',
-        x: Math.round(cx - 160 * sx),
-        y: Math.round(cy + 360 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 2
-      });
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx - 160 * sx),
+          y: Math.round(cy + 360 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+      }
       if (bgKey) {
         placed.push({
           type: bgKey,
@@ -893,15 +895,17 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 2
       });
-      placed.push({
-        type: accentKey || 'coin',
-        state: 'main',
-        x: Math.round(cx + 120 * sx),
-        y: Math.round(cy + 240 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 3
-      });
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx + 120 * sx),
+          y: Math.round(cy + 240 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      }
     } else if (bgKey === 'lamp') {
       // Studio Card 5: Lamp upper-left + Wallet lower-center + Coin right (no lamp base collision!)
       placed.push({
@@ -922,34 +926,38 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 2
       });
-      placed.push({
-        type: accentKey || 'coin',
-        state: 'main',
-        x: Math.round(cx + 160 * sx),
-        y: Math.round(cy + 10 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 3
-      });
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx + 160 * sx),
+          y: Math.round(cy + 10 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      }
     } else {
       placed.push({
         type: 'wallet',
         state: 'main',
-        x: Math.round(cx - 60 * sx),
-        y: Math.round(cy + 180 * sy),
+        x: Math.round(cx - 160 * sx),
+        y: Math.round(cy + 190 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 2
       });
-      placed.push({
-        type: accentKey || 'coin',
-        state: 'main',
-        x: Math.round(cx + 180 * sx),
-        y: Math.round(cy + 120 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 3
-      });
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx + 180 * sx),
+          y: Math.round(cy + 220 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      }
       if (bgKey) {
         placed.push({
           type: bgKey,
@@ -965,53 +973,23 @@ export function buildIsometricScene(
 
   // ARCHETYPE 3: Headphones
   } else if (heroKey === 'headphones') {
-    if (bgKey === 'flowers' || !bgKey) {
-      // Studio Card 4: Flowers bleeding top-left + Headphones foreground focus
-      placed.push({
-        type: 'flowers',
-        state: 'bg',
-        x: Math.round(cx - 240 * sx),
-        y: Math.round(cy - 200 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 1
-      });
-      placed.push({
-        type: 'headphones',
-        state: 'main',
-        x: Math.round(cx + 40 * sx),
-        y: Math.round(cy + 140 * sy),
-        scale: Number((s * 1.08).toFixed(4)),
-        rot: 0,
-        zIndex: 2
-      });
-      if (accentKey) {
-        placed.push({
-          type: accentKey,
-          state: 'main',
-          x: Math.round(cx + 200 * sx),
-          y: Math.round(cy - 60 * sy),
-          scale: Number((s * 0.88).toFixed(4)),
-          rot: 0,
-          zIndex: 3
-        });
-      }
-    } else if (bgKey === 'lamp') {
+    if (bgKey === 'lamp') {
+      // User Reference Image 2: Lamp pushed to far upper-left background, Headphones in upper-right midground, Phone/Accent in lower-left foreground
       placed.push({
         type: 'lamp',
         state: 'bg',
-        x: Math.round(cx - 230 * sx),
-        y: Math.round(cy - 220 * sy),
-        scale: Number((s * 1.03).toFixed(4)),
+        x: Math.round(cx - 330 * sx),
+        y: Math.round(cy - 335 * sy),
+        scale: Number((s * 0.98).toFixed(4)),
         rot: 0,
         zIndex: 0
       });
       placed.push({
         type: 'headphones',
         state: 'main',
-        x: Math.round(cx + 60 * sx),
-        y: Math.round(cy + 140 * sy),
-        scale: Number((s * 1.08).toFixed(4)),
+        x: Math.round(cx + 180 * sx),
+        y: Math.round(cy + 5 * sy),
+        scale: Number((s * 1.12).toFixed(4)),
         rot: 0,
         zIndex: 2
       });
@@ -1019,50 +997,183 @@ export function buildIsometricScene(
         placed.push({
           type: accentKey,
           state: 'main',
-          x: Math.round(cx - 40 * sx),
-          y: Math.round(cy + 240 * sy),
-          scale: Number((s * 0.85).toFixed(4)),
+          x: Math.round(cx - 165 * sx),
+          y: Math.round(cy + 305 * sy),
+          scale: Number(s.toFixed(4)),
           rot: 0,
           zIndex: 3
         });
       }
-    } else {
-      placed.push({
-        type: 'headphones',
-        state: 'main',
-        x: Math.round(cx + 20 * sx),
-        y: Math.round(cy + 140 * sy),
-        scale: Number((s * 1.08).toFixed(4)),
-        rot: 0,
-        zIndex: 2
-      });
-      if (bgKey) {
+    } else if (bgKey === 'flowers') {
+      if (accentKey) {
+        // Multi-item composition (e.g. Travel & Impressions): Flowers top-left background, Headphones upper-right midground, Accent (Phone) lower-left foreground
         placed.push({
-          type: bgKey,
+          type: 'flowers',
           state: 'bg',
-          x: Math.round(cx - 220 * sx),
-          y: Math.round(cy - 180 * sy),
+          x: Math.round(cx - 260 * sx),
+          y: Math.round(cy - 220 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 0
+        });
+        placed.push({
+          type: 'headphones',
+          state: 'main',
+          x: Math.round(cx + 180 * sx),
+          y: Math.round(cy + 5 * sy),
+          scale: Number((s * 1.12).toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx - 165 * sx),
+          y: Math.round(cy + 305 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      } else {
+        // Studio Card 4 canonical 2-item layout: Flowers bleeding top-left + Headphones foreground focus
+        placed.push({
+          type: 'flowers',
+          state: 'bg',
+          x: Math.round(cx - 240 * sx),
+          y: Math.round(cy - 200 * sy),
           scale: Number(s.toFixed(4)),
           rot: 0,
           zIndex: 1
         });
+        placed.push({
+          type: 'headphones',
+          state: 'main',
+          x: Math.round(cx + 40 * sx),
+          y: Math.round(cy + 140 * sy),
+          scale: Number((s * 1.08).toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
       }
+    } else if (bgKey) {
       if (accentKey) {
+        placed.push({
+          type: bgKey,
+          state: 'bg',
+          x: Math.round(cx - 260 * sx),
+          y: Math.round(cy - 220 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 0
+        });
+        placed.push({
+          type: 'headphones',
+          state: 'main',
+          x: Math.round(cx + 180 * sx),
+          y: Math.round(cy + 5 * sy),
+          scale: Number((s * 1.12).toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
         placed.push({
           type: accentKey,
           state: 'main',
-          x: Math.round(cx + 200 * sx),
-          y: Math.round(cy - 60 * sy),
+          x: Math.round(cx - 165 * sx),
+          y: Math.round(cy + 305 * sy),
           scale: Number(s.toFixed(4)),
           rot: 0,
           zIndex: 3
+        });
+      } else {
+        placed.push({
+          type: bgKey,
+          state: 'bg',
+          x: Math.round(cx - 240 * sx),
+          y: Math.round(cy - 200 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 1
+        });
+        placed.push({
+          type: 'headphones',
+          state: 'main',
+          x: Math.round(cx + 40 * sx),
+          y: Math.round(cy + 140 * sy),
+          scale: Number((s * 1.08).toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+      }
+    } else {
+      // bgKey is null (e.g. 2-item pairing Headphones + Phone/Accent, or single Headphones)
+      if (accentKey) {
+        placed.push({
+          type: 'headphones',
+          state: 'main',
+          x: Math.round(cx + 180 * sx),
+          y: Math.round(cy + 5 * sy),
+          scale: Number((s * 1.12).toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx - 165 * sx),
+          y: Math.round(cy + 305 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 3
+        });
+      } else {
+        placed.push({
+          type: 'headphones',
+          state: 'main',
+          x: Math.round(cx + 40 * sx),
+          y: Math.round(cy + 140 * sy),
+          scale: Number((s * 1.08).toFixed(4)),
+          rot: 0,
+          zIndex: 2
         });
       }
     }
 
   // ARCHETYPE 4: Phone
   } else if (heroKey === 'phone') {
-    if (accentKey === 'puzzle' || !accentKey) {
+    if (bgKey === 'headphones' || accentKey === 'headphones') {
+      // Scenario 9 & Phone+Headphones pairing: Harmonious triangle
+      // Headphones in upper-right midground, Phone in lower-left foreground, third item in upper-left background
+      const thirdKey = bgKey !== 'headphones' ? bgKey : accentKey !== 'headphones' ? accentKey : null;
+      if (thirdKey) {
+        placed.push({
+          type: thirdKey,
+          state: 'bg',
+          x: Math.round(cx - 240 * sx),
+          y: Math.round(cy - 220 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 0
+        });
+      }
+      placed.push({
+        type: 'headphones',
+        state: bgKey === 'headphones' ? 'bg' : 'main',
+        x: Math.round(cx + 180 * sx),
+        y: Math.round(cy + 5 * sy),
+        scale: Number((s * 1.12).toFixed(4)),
+        rot: 0,
+        zIndex: 1
+      });
+      placed.push({
+        type: 'phone',
+        state: 'main',
+        x: Math.round(cx - 165 * sx),
+        y: Math.round(cy + 305 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 2
+      });
+    } else if (accentKey === 'puzzle' || !accentKey) {
       // Studio Card 1: Phone lower-left + Puzzle upper-right
       placed.push({
         type: 'phone',
@@ -1073,22 +1184,25 @@ export function buildIsometricScene(
         rot: 0,
         zIndex: 2
       });
-      placed.push({
-        type: 'puzzle',
-        state: 'main',
-        x: Math.round(cx + 180 * sx),
-        y: Math.round(cy - 140 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 1
-      });
+      if (accentKey === 'puzzle') {
+        placed.push({
+          type: 'puzzle',
+          state: 'main',
+          x: Math.round(cx + 180 * sx),
+          y: Math.round(cy - 140 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 1
+        });
+      }
       if (bgKey && bgKey !== 'puzzle') {
+        const isLamp = bgKey === 'lamp';
         placed.push({
           type: bgKey,
           state: 'bg',
-          x: Math.round(cx - 230 * sx),
-          y: Math.round(cy - 210 * sy),
-          scale: Number((bgKey === 'lamp' ? s * 1.03 : s).toFixed(4)),
+          x: Math.round(isLamp ? cx - 300 * sx : cx - 230 * sx),
+          y: Math.round(isLamp ? cy - 300 * sy : cy - 210 * sy),
+          scale: Number((isLamp ? s * 0.98 : s).toFixed(4)),
           rot: 0,
           zIndex: 0
         });
@@ -1151,7 +1265,7 @@ export function buildIsometricScene(
       placed.push({
         type: 'pen',
         state: 'main',
-        x: Math.round(cx - 80 * sx),
+        x: Math.round(cx - 140 * sx),
         y: Math.round(cy + 220 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
@@ -1160,7 +1274,7 @@ export function buildIsometricScene(
       placed.push({
         type: 'coin',
         state: 'main',
-        x: Math.round(cx + 140 * sx),
+        x: Math.round(cx + 160 * sx),
         y: Math.round(cy + 220 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
@@ -1266,17 +1380,18 @@ export function buildIsometricScene(
       rot: 0,
       zIndex: 1
     });
-    const lampAccent = accentKey || (bgKey === 'pen' ? 'pen' : 'wallet');
-    placed.push({
-      type: lampAccent,
-      state: 'main',
-      x: Math.round(cx + 200 * sx),
-      y: Math.round(cy + 280 * sy),
-      scale: Number(s.toFixed(4)),
-      rot: 0,
-      zIndex: 2
-    });
-    if (bgKey && bgKey !== lampAccent) {
+    if (accentKey) {
+      placed.push({
+        type: accentKey,
+        state: 'main',
+        x: Math.round(cx + 200 * sx),
+        y: Math.round(cy + 280 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 2
+      });
+    }
+    if (bgKey && bgKey !== accentKey) {
       placed.push({
         type: bgKey,
         state: 'bg',
@@ -1593,7 +1708,7 @@ export function generateCompositionFromComponents(
   // If 2 items selected: 1 Background + 1 Hero OR 1 Hero + 1 Accent
   if (validKeys.length === 2) {
     const bgTypes = ['lamp', 'flowers', 'folder'];
-    const accentTypes = ['coin', 'pen', 'puzzle'];
+    const accentTypes = ['coin', 'pen', 'puzzle', 'phone'];
     
     if (bgTypes.includes(validKeys[0]) && !bgTypes.includes(validKeys[1])) {
       return buildIsometricScene(validKeys[1], validKeys[0], null, format, detailSize);
