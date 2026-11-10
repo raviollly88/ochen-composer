@@ -42,8 +42,9 @@ export function buildStandaloneSVG(
   lines.push(`    <g id="composition-layer" filter="url(#card-shadow)">`);
 
   for (const item of sortedItems) {
-    const assetId = `${item.objectType}-${item.size}-${item.state}`;
-    const asset = assetMap[assetId];
+    const itemSize = item.size || 'L';
+    const assetId = `${item.objectType}-${itemSize}-${item.state}`;
+    const asset = assetMap[assetId] || assetMap[`${item.objectType}-L-${item.state}`] || assetMap[`${item.objectType}-L-main`];
     if (!asset) continue;
 
     // In SVG, translate to item.x, item.y and scale/rotate around center

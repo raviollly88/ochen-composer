@@ -60,15 +60,15 @@ export const AI_SCENARIOS: AIScenario[] = [
     discriminators: ['музык', 'песн', 'трек', 'вайб', 'плейлист']
   },
 
-  // 2. Личные финансы и бюджет (Wallet + Lamp + Coin)
+  // 2. Личные финансы и бюджет (Wallet + Folder + Coin)
   {
     id: 'personal_finance',
     title: 'Личные финансы и бюджет',
-    description: 'Кожаный кошелек, монета на переднем плане и фоновая лампа (эталон студии)',
+    description: 'Кожаный кошелек, папка документов в верхнем правом углу и монета на столе (эталон студии)',
     editorialConcept: 'Управление личными накоплениями, финансовая грамотность и осознанный учет бюджета',
-    visualMetaphor: 'Кошелек как фокус материальных ресурсов, монета вдоль 30° оси для динамики транзакций и лампа вечернего учета',
+    visualMetaphor: 'Кошелек как фокус материальных ресурсов на переднем плане, монета вдоль 30° оси и папка финансовой отчетности в фоне',
     hero: 'wallet',
-    bg: 'lamp',
+    bg: 'folder',
     accent: 'coin',
     palette: 'peach',
     paletteRationale: 'Теплый персик Warm Peach передает материальную надежность, стабильность и осязаемость капитала',
@@ -108,9 +108,9 @@ export const AI_SCENARIOS: AIScenario[] = [
   {
     id: 'it_startup_dev',
     title: 'IT-стартап и разработка',
-    description: 'Смартфон с мобильным приложением и пазлы архитектуры под лампой',
+    description: 'Смартфон в левом нижнем углу, модули пазла в правом верхнем и лампа в дальнем углу (референс пользователя)',
     editorialConcept: 'Создание технологического продукта, микросервисная архитектура и запуск инновационного SaaS',
-    visualMetaphor: 'Смартфон с сервисом, настольная лампа рабочей зоны и модули сборки архитектурного пазла',
+    visualMetaphor: 'Смартфон продукта на переднем плане слева, модули пазла архитектуры в правом верхнем квадранте и лампа в дальнем верхнем углу',
     hero: 'phone',
     bg: 'lamp',
     accent: 'puzzle',
@@ -119,33 +119,33 @@ export const AI_SCENARIOS: AIScenario[] = [
     intentKeywords: [
       'стартап', 'технологи', 'приложен', 'код', 'разработк', 'программ', 'saas', 'дев',
       'архитектур', 'пазл', 'скрипт', 'инженер', 'сервис', 'бэкенд', 'фронтенд', 'деплой',
-      'гит', 'коммит', 'релиз', 'баг', 'фич', 'api', 'интеграц', 'it',
-      'startup', 'dev', 'code', 'software', 'tech', 'architecture', 'puzzle', 'engineer'
+      'гит', 'коммит', 'релиз', 'баг', 'фич', 'api', 'интеграц', 'it', 'продукт',
+      'startup', 'dev', 'code', 'software', 'tech', 'architecture', 'puzzle', 'engineer', 'product'
     ],
     intentTags: ['Software Engineering', 'Стартап-экосистема', 'Архитектура решений', 'Цифровые продукты'],
-    discriminators: ['стартап', 'saas', 'код', 'разработк', 'архитектур']
+    discriminators: ['стартап', 'saas', 'код', 'разработк', 'архитектур', 'продукт']
   },
 
-  // 5. Рабочее пространство и порядок (Folder + Lamp + Pen)
+  // 5. Рабочее пространство и порядок (Notebook + Folder + Pen)
   {
     id: 'workspace_order',
     title: 'Рабочее пространство и порядок',
-    description: 'Папка документов, ручка для подписи и настольная лампа в фоне',
+    description: 'Папка документов в фоне справа, открытый блокнот регламентов и перьевая ручка для визирования',
     editorialConcept: 'Организация рабочего стола, регламенты, корпоративное делопроизводство и структурный порядок',
-    visualMetaphor: 'Папка документов, перьевая ручка для визирования резолюций и настольная лампа кабинета',
-    hero: 'folder',
-    bg: 'lamp',
+    visualMetaphor: 'Папка документов в правом верхнем фоне, открытый блокнот нормативов и ручка для визирования на переднем плане',
+    hero: 'notebook',
+    bg: 'folder',
     accent: 'pen',
     palette: 'purple',
     paletteRationale: 'Строгая фиолетовая палитра задает тон собранности, структурности и деловой дисциплины',
     intentKeywords: [
       'папк', 'документ', 'офис', 'порядок', 'регламент', 'делопроизводств', 'дело',
       'архив', 'стол', 'кабинет', 'рабоч', 'подпис', 'ручк', 'канцеляр', 'досье',
-      'бюрократи', 'отчет', 'структур', 'инструкци', 'согласован',
-      'workspace', 'office', 'folder', 'documents', 'desk', 'order', 'report'
+      'бюрократи', 'отчет', 'структур', 'инструкци', 'согласован', 'блокнот',
+      'workspace', 'office', 'folder', 'documents', 'desk', 'order', 'report', 'notebook'
     ],
     intentTags: ['Делопроизводство', 'Организация офиса', 'Рабочие процессы', 'Документооборот'],
-    discriminators: ['делопроизводств', 'регламент', 'архив', 'канцеляр', 'документооборот']
+    discriminators: ['делопроизводств', 'регламент', 'архив', 'канцеляр', 'документооборот', 'порядок']
   },
 
   // 6. Кибербезопасность и защита данных (Wallet + Coin + Puzzle)
@@ -302,16 +302,16 @@ export const AI_SCENARIOS: AIScenario[] = [
     discriminators: ['путешеств', 'туризм', 'отпуск', 'поездк', 'билет', 'отел', 'рейс']
   },
 
-  // 13. Уют и домашняя атмосфера (Flowers + Lamp + Notebook)
+  // 13. Уют и домашняя атмосфера (Flowers + Notebook + Pen)
   {
     id: 'cozy_home',
     title: 'Уют и домашняя атмосфера',
-    description: 'Личный дневник на столике, мягкий свет лампы и весенний букет в вазе',
+    description: 'Личный дневник на столике, свежий весенний букет цветов и ручка для мыслей',
     editorialConcept: 'Домашний очаг, медленная жизнь (slow living), уютные вечера, декор и теплое пространство',
-    visualMetaphor: 'Личный дневник на столе, мягкий свет настольной лампы и весенний букет в вазе',
+    visualMetaphor: 'Личный дневник на столе, весенний букет цветов в вазе и ручка для фиксации мыслей',
     hero: 'notebook',
-    bg: 'lamp',
-    accent: 'flowers',
+    bg: 'flowers',
+    accent: 'pen',
     palette: 'peach',
     paletteRationale: 'Персиковое тепло окутывает пространство уютом, согревает и создает атмосферу дома',
     intentKeywords: [
@@ -434,13 +434,13 @@ export const AI_SCENARIOS: AIScenario[] = [
     discriminators: ['менеджмент', 'управлен', 'планирован', 'дедлайн', 'лидерств', 'руководител']
   },
 
-  // 19. Подкасты и медиа (Headphones + Phone + Lamp)
+  // 19. Подкасты и медиа (Headphones + Lamp + Phone)
   {
     id: 'podcasts_media',
     title: 'Подкасты и медиа',
-    description: 'Студийные мониторные наушники, свет лампы студии и смартфон записи',
+    description: 'Студийные мониторные наушники, свет лампы студии и смартфон записи (User Reference Image 2)',
     editorialConcept: 'Индустрия разговорных подкастов, радиоэфиры, студийная звукозапись и цифровой контент',
-    visualMetaphor: 'Профессиональные мониторные наушники, свет студийной лампы и смартфон эфира',
+    visualMetaphor: 'Профессиональные мониторные наушники, свет студийной лампы в верхнем левом углу и смартфон записи в нижнем левом углу',
     hero: 'headphones',
     bg: 'lamp',
     accent: 'phone',
@@ -486,50 +486,50 @@ export const AI_SCENARIOS: AIScenario[] = [
 export const PRESET_THEMES: PresetTheme[] = [
   {
     title: 'Музыка и отдых',
-    description: 'Наушники на первом плане и ваза с цветами в фоне (эталон студии)',
-    prompt: 'музыка отдых релакс треки звук гармония акустика',
+    description: 'Наушники на переднем плане и ваза с цветами в левом верхнем фоне',
+    prompt: 'музыка отдых релакс треки звук гармония акустика ваза цветы',
     palette: 'mint'
   },
   {
-    title: 'Личные финансы и бюджет',
-    description: 'Кожаный кошелек, монета на переднем плане и фоновая лампа (эталон студии)',
-    prompt: 'личные финансы деньги кошелек бюджет инвестиции сбережения капитал',
+    title: 'Конспекты и продуктивность',
+    description: 'Открытый блокнот со смартфоном на странице и ручкой для пометок',
+    prompt: 'конспекты учеба продуктивность блокнот записи лекции смартфон ручка',
     palette: 'peach'
   },
   {
-    title: 'Журналистика и писательство',
-    description: 'Открытый блокнот, настольная лампа в фоне и ручка перед разворотом (референс студии)',
-    prompt: 'журналистика автор статья текст репортаж рукопись писательство',
-    palette: 'purple'
+    title: 'Личные финансы и бюджет',
+    description: 'Кожаный кошелек, папка документов в верхнем правом фоне и монета',
+    prompt: 'личные финансы деньги кошелек папка документов бюджет накопления монета',
+    palette: 'peach'
   },
   {
-    title: 'IT-стартап и разработка',
-    description: 'Смартфон с мобильным приложением и пазлы архитектуры под лампой',
-    prompt: 'стартап технологии приложение код сборка пазл разработка saas',
+    title: 'IT-стартап и продукт',
+    description: 'Смартфон приложения, модули пазла и лампа в дальнем углу (референс)',
+    prompt: 'стартап технологии приложение код сборка пазл разработка продукт saas',
     palette: 'mint'
   },
   {
     title: 'Рабочее пространство и порядок',
-    description: 'Папка документов, ручка для подписи и настольная лампа в фоне',
-    prompt: 'документы папка договор подпись работа офис регламент порядок',
+    description: 'Папка документов в фоне справа, открытый блокнот и ручка для подписи',
+    prompt: 'документы папка договор подпись работа офис регламент порядок блокнот ручка',
     palette: 'purple'
   }
 ];
 
 /**
  * Natural companion pairings for each primary object when fewer than 3 objects are matched.
- * Strictly adheres to Studio Ochen's reference compositions.
+ * Strictly adheres to Studio Ochen's reference compositions and breaks lamp monotony.
  */
 export const NATURAL_COMPANIONS: Record<string, { bg: string | null; accent: string | null }> = {
-  notebook: { bg: 'lamp', accent: 'pen' },
-  wallet: { bg: 'lamp', accent: 'coin' },
+  notebook: { bg: 'phone', accent: 'pen' },
+  wallet: { bg: 'folder', accent: 'coin' },
   phone: { bg: null, accent: 'puzzle' },
   headphones: { bg: 'flowers', accent: null },
-  folder: { bg: 'lamp', accent: 'pen' },
+  folder: { bg: 'notebook', accent: 'pen' },
   lamp: { bg: null, accent: 'wallet' },
   flowers: { bg: null, accent: 'headphones' },
-  pen: { bg: 'lamp', accent: 'notebook' },
-  coin: { bg: 'lamp', accent: 'wallet' },
+  pen: { bg: 'notebook', accent: null },
+  coin: { bg: 'folder', accent: 'wallet' },
   puzzle: { bg: null, accent: 'phone' }
 };
 
@@ -838,6 +838,37 @@ export function buildIsometricScene(
           zIndex: 2
         });
       }
+    } else if (bgKey === 'folder') {
+      // Workspace & Order: Folder bleeding top-right background + Notebook center-left foreground + Pen lower-right foreground
+      placed.push({
+        type: 'folder',
+        state: 'bg',
+        x: Math.round(cx + 220 * sx),
+        y: Math.round(cy - 130 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 0
+      });
+      placed.push({
+        type: 'notebook',
+        state: 'main',
+        x: Math.round(cx - 130 * sx),
+        y: Math.round(cy + 110 * sy),
+        scale: Number((s * 1.02).toFixed(4)),
+        rot: 0,
+        zIndex: 1
+      });
+      if (accentKey) {
+        placed.push({
+          type: accentKey,
+          state: 'main',
+          x: Math.round(cx + 140 * sx),
+          y: Math.round(cy + 270 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+      }
     } else {
       // Notebook + Accent in foreground + optional Flower/other bg
       placed.push({
@@ -879,7 +910,7 @@ export function buildIsometricScene(
       // Studio Card 3: Folder bleeding top-right + Wallet foreground-left + Coin foreground-right
       placed.push({
         type: 'folder',
-        state: 'main',
+        state: 'bg',
         x: Math.round(cx + 200 * sx),
         y: Math.round(cy - 120 * sy),
         scale: Number(s.toFixed(4)),
@@ -1174,38 +1205,69 @@ export function buildIsometricScene(
         zIndex: 2
       });
     } else if (accentKey === 'puzzle' || !accentKey) {
-      // Studio Card 1: Phone lower-left + Puzzle upper-right
-      placed.push({
-        type: 'phone',
-        state: 'main',
-        x: Math.round(cx - 120 * sx),
-        y: Math.round(cy + 120 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 2
-      });
-      if (accentKey === 'puzzle') {
+      if (bgKey === 'lamp') {
+        // User Reference IT-Startup Layout (media_1794340128223_b966c98c.jpg):
+        // Lamp in far upper-left background, Puzzle in upper-right midground, Phone in lower-left foreground
         placed.push({
-          type: 'puzzle',
-          state: 'main',
-          x: Math.round(cx + 180 * sx),
-          y: Math.round(cy - 140 * sy),
-          scale: Number(s.toFixed(4)),
-          rot: 0,
-          zIndex: 1
-        });
-      }
-      if (bgKey && bgKey !== 'puzzle') {
-        const isLamp = bgKey === 'lamp';
-        placed.push({
-          type: bgKey,
+          type: 'lamp',
           state: 'bg',
-          x: Math.round(isLamp ? cx - 300 * sx : cx - 230 * sx),
-          y: Math.round(isLamp ? cy - 300 * sy : cy - 210 * sy),
-          scale: Number((isLamp ? s * 0.98 : s).toFixed(4)),
+          x: Math.round(cx - 330 * sx),
+          y: Math.round(cy - 330 * sy),
+          scale: Number((s * 0.98).toFixed(4)),
           rot: 0,
           zIndex: 0
         });
+        placed.push({
+          type: 'puzzle',
+          state: 'main',
+          x: Math.round(cx + 190 * sx),
+          y: Math.round(cy - 65 * sy),
+          scale: Number((s * 1.04).toFixed(4)),
+          rot: 0,
+          zIndex: 1
+        });
+        placed.push({
+          type: 'phone',
+          state: 'main',
+          x: Math.round(cx - 165 * sx),
+          y: Math.round(cy + 305 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+      } else {
+        // Studio Card 1: Phone lower-left + Puzzle upper-right
+        placed.push({
+          type: 'phone',
+          state: 'main',
+          x: Math.round(cx - 120 * sx),
+          y: Math.round(cy + 120 * sy),
+          scale: Number(s.toFixed(4)),
+          rot: 0,
+          zIndex: 2
+        });
+        if (accentKey === 'puzzle') {
+          placed.push({
+            type: 'puzzle',
+            state: 'main',
+            x: Math.round(cx + 180 * sx),
+            y: Math.round(cy - 140 * sy),
+            scale: Number(s.toFixed(4)),
+            rot: 0,
+            zIndex: 1
+          });
+        }
+        if (bgKey && bgKey !== 'puzzle') {
+          placed.push({
+            type: bgKey,
+            state: 'bg',
+            x: Math.round(cx - 230 * sx),
+            y: Math.round(cy - 210 * sy),
+            scale: Number(s.toFixed(4)),
+            rot: 0,
+            zIndex: 0
+          });
+        }
       }
     } else {
       placed.push({
@@ -1595,30 +1657,39 @@ export function generateCompositionFromPrompt(
   let accentKey = selectedScenario.accent;
 
   if (explicitObjects.length > 0) {
-    // If user explicitly named objects, adapt the composition while respecting the scenario's editorial role
-    if (explicitObjects.length === 1) {
-      const explicit = explicitObjects[0];
-      if (explicit !== heroKey && explicit !== bgKey && explicit !== accentKey) {
-        // Replace or pair
-        if (['lamp', 'flowers', 'folder'].includes(explicit) && !bgKey) {
-          bgKey = explicit;
-        } else if (['coin', 'pen', 'puzzle'].includes(explicit) && !accentKey) {
-          accentKey = explicit;
-        } else {
-          heroKey = explicit;
+    // If all explicit objects are already part of selectedScenario, preserve the carefully designed scenario roles!
+    const scenarioObjects = [selectedScenario.hero, selectedScenario.bg, selectedScenario.accent].filter(Boolean);
+    const hasExternalObjects = explicitObjects.some(obj => !scenarioObjects.includes(obj));
+
+    if (hasExternalObjects) {
+      if (explicitObjects.length === 1) {
+        const explicit = explicitObjects[0];
+        if (explicit !== heroKey && explicit !== bgKey && explicit !== accentKey) {
+          if (['lamp', 'flowers', 'folder'].includes(explicit) && !bgKey) {
+            bgKey = explicit;
+          } else if (['coin', 'pen', 'puzzle'].includes(explicit) && !accentKey) {
+            accentKey = explicit;
+          } else {
+            heroKey = explicit;
+          }
         }
+      } else if (explicitObjects.length >= 2) {
+        const bgTypes = ['lamp', 'flowers', 'folder'];
+        const accentTypes = ['coin', 'pen', 'puzzle'];
+
+        // Prefer scenario hero if present among explicit objects
+        const explicitHero = explicitObjects.find(k => k === selectedScenario.hero) ||
+          explicitObjects.find(k => !bgTypes.includes(k) && !accentTypes.includes(k)) ||
+          explicitObjects[0];
+
+        const remaining = explicitObjects.filter(k => k !== explicitHero);
+        const explicitBg = remaining.find(k => bgTypes.includes(k)) || null;
+        const explicitAccent = remaining.find(k => accentTypes.includes(k) && k !== explicitBg) || remaining.find(k => k !== explicitBg) || null;
+
+        heroKey = explicitHero;
+        bgKey = explicitBg || selectedScenario.bg;
+        accentKey = explicitAccent || selectedScenario.accent;
       }
-    } else if (explicitObjects.length >= 2) {
-      const bgTypes = ['lamp', 'flowers', 'folder'];
-      const accentTypes = ['coin', 'pen', 'puzzle'];
-
-      const explicitBg = explicitObjects.find(k => bgTypes.includes(k) && k !== explicitObjects[0]);
-      const explicitAccent = explicitObjects.find(k => accentTypes.includes(k) && k !== explicitBg);
-      const explicitHero = explicitObjects.find(k => k !== explicitBg && k !== explicitAccent) || explicitObjects[0];
-
-      heroKey = explicitHero;
-      bgKey = explicitBg || (explicitObjects.length > 1 && explicitObjects[1] !== explicitHero ? explicitObjects[1] : null);
-      accentKey = explicitAccent || (explicitObjects.length > 2 && explicitObjects[2] !== explicitHero && explicitObjects[2] !== bgKey ? explicitObjects[2] : null);
     }
   }
 
@@ -1701,7 +1772,7 @@ export function generateCompositionFromComponents(
   // If 1 item selected: automatically pair it with a natural companion (2-3 items total)
   if (validKeys.length === 1) {
     const hero = validKeys[0];
-    const companions = NATURAL_COMPANIONS[hero] || { bg: 'lamp', accent: 'pen' };
+    const companions = NATURAL_COMPANIONS[hero] || { bg: 'folder', accent: 'pen' };
     return buildIsometricScene(hero, companions.bg, companions.accent, format, detailSize);
   }
 

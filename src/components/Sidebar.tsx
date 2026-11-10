@@ -23,14 +23,14 @@ interface SidebarProps {
   onSelectItem: (id: string | null) => void;
   detailSize: DetailSize;
   assetMap: Record<string, AssetMeta>;
-  onAddItem: (objectType: string, state: ObjectState) => void;
+  onAddItem: (objectType: string, state: ObjectState, size?: DetailSize) => void;
   onUpdateItem: (id: string, updates: Partial<CanvasItem>) => void;
   onDeleteItem: (id: string) => void;
   onDuplicateItem: (id: string) => void;
   onBringToFront: (id: string) => void;
   onSendToBack: (id: string) => void;
   onGenerateAI: (prompt: string) => void;
-  onAutoLayoutComponents: (keys: string[]) => void;
+  onAutoLayoutComponents: (keys: string[], size?: DetailSize) => void;
   lastAiRationale: string | null;
 }
 
@@ -54,6 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [promptInput, setPromptInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [libraryState, setLibraryState] = useState<ObjectState>('main');
+  const [libraryDetailSize, setLibraryDetailSize] = useState<DetailSize>(detailSize || 'L');
   const [selectedLibraryKeys, setSelectedLibraryKeys] = useState<string[]>([]);
 
   // When an item is selected, smoothly open inspector tab
@@ -81,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleAutoLayoutSelected = () => {
     if (selectedLibraryKeys.length === 0) return;
-    onAutoLayoutComponents(selectedLibraryKeys);
+    onAutoLayoutComponents(selectedLibraryKeys, libraryDetailSize);
     setSelectedLibraryKeys([]);
   };
 
@@ -235,23 +236,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 />
               </div>
 
-              <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
-                <button
-                  onClick={() => setLibraryState('main')}
-                  className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
-                    libraryState === 'main' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  Главные (Цвет)
-                </button>
-                <button
-                  onClick={() => setLibraryState('bg')}
-                  className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
-                    libraryState === 'bg' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  Фоновые (Монохром)
-                </button>
+              {/* State and Detail Size controls */}
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
+                  <button
+                    onClick={() => setLibraryState('main')}
+                    className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
+                      libraryState === 'main' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    Цвет
+                  </button>
+                  <button
+                    onClick={() => setLibraryState('bg')}
+                    className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
+                      libraryState === 'bg' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    Монохром
+                  </button>
+                </div>
+
+                <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setLibraryDetailSize('L')}
+                    className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
+                      libraryDetailSize === 'L' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                    title="Высокая детализация (Размер L)"
+                  >
+                    Размер L
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLibraryDetailSize('S')}
+                    className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
+                      libraryDetailSize === 'S' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                    title="Упрощенный компактный вид (Размер S)"
+                  >
+                    Размер S
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -269,7 +296,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Component Grid */}
             <div className="grid grid-cols-2 gap-2">
               {filteredCatalog.map(([key, meta]) => {
-                const assetId = `${key}-${detailSize}-${libraryState}`;
+                const assetId = `${key}-${libraryDetailSize}-${libraryState}`;
                 const asset = assetMap[assetId];
                 const isChecked = selectedLibraryKeys.includes(key);
 
@@ -281,7 +308,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         ? 'bg-zinc-800/80 border-zinc-500 ring-1 ring-zinc-400/40'
                         : 'bg-zinc-950/60 hover:bg-zinc-800/60 border-zinc-800 hover:border-zinc-700'
                     }`}
-                    onClick={() => onAddItem(key, libraryState)}
+                    onClick={() => onAddItem(key, libraryState, libraryDetailSize)}
                   >
                     {/* Checkbox for batch multi-select */}
                     <button
@@ -361,14 +388,55 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </div>
 
+                {/* Detail Level Toggle: L (Детализированный) vs S (Компактный / Упрощенный) */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs text-zinc-300">
+                    <span className="font-medium">Детализация предмета:</span>
+                    <span className="text-zinc-400 font-mono text-[11px]">
+                      {(selectedItem.size || 'L') === 'S' ? 'S (Упрощенный)' : 'L (Детализированный)'}
+                    </span>
+                  </div>
+                  <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => onUpdateItem(selectedItem.id, { size: 'L' })}
+                      className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
+                        (selectedItem.size || 'L') !== 'S'
+                          ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/60'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                      title="Высокая детализация (Размер L)"
+                    >
+                      L (Детализированный)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onUpdateItem(selectedItem.id, { size: 'S' })}
+                      className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
+                        selectedItem.size === 'S'
+                          ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/60'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                      title="Упрощенный компактный вид (Размер S)"
+                    >
+                      S (Упрощенный)
+                    </button>
+                  </div>
+                </div>
+
                 {/* State Toggle: Main vs Bg */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-zinc-300">Состояние элемента:</label>
+                  <div className="flex justify-between text-xs text-zinc-300">
+                    <span className="font-medium">Состояние элемента:</span>
+                    <span className="text-zinc-400 font-mono text-[11px]">
+                      {selectedItem.state === 'main' ? 'Главный (Цвет)' : 'Фоновый (Монохром)'}
+                    </span>
+                  </div>
                   <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs">
                     <button
                       onClick={() => onUpdateItem(selectedItem.id, { state: 'main' })}
                       className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
-                        selectedItem.state === 'main' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400'
+                        selectedItem.state === 'main' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
                       Главный (Цвет)
@@ -376,7 +444,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       onClick={() => onUpdateItem(selectedItem.id, { state: 'bg' })}
                       className={`flex-1 py-1.5 rounded-lg font-medium transition-all ${
-                        selectedItem.state === 'bg' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400'
+                        selectedItem.state === 'bg' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
                       Фоновый (Монохром)
@@ -520,7 +588,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${item.state === 'main' ? 'bg-amber-400' : 'bg-zinc-500'}`} />
                           <span>{meta?.labelRu || item.objectType}</span>
-                          <span className="text-[10px] text-zinc-500 font-mono">({item.state})</span>
+                          <span className="text-[10px] text-zinc-400 font-mono">
+                            ({item.size || 'L'}, {item.state === 'main' ? 'цвет' : 'монохром'})
+                          </span>
                         </div>
                         <button
                           onClick={e => {

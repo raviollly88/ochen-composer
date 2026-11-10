@@ -50,7 +50,7 @@ export function App() {
     }
   };
 
-  const handleAddItem = (objectType: string, state: ObjectState) => {
+  const handleAddItem = (objectType: string, state: ObjectState, size?: DetailSize) => {
     const cfg = FORMATS[format];
     const maxZ = items.length > 0 ? Math.max(...items.map(i => i.zIndex)) : 0;
     
@@ -59,7 +59,7 @@ export function App() {
     const newItem: CanvasItem = {
       id: `item-${Date.now()}`,
       objectType,
-      size: detailSize,
+      size: size || detailSize,
       state,
       x: Math.round(cfg.width / 2 + offset),
       y: Math.round(cfg.height / 2 + offset),
@@ -84,6 +84,7 @@ export function App() {
     const dup: CanvasItem = {
       ...orig,
       id: `item-dup-${Date.now()}`,
+      size: orig.size || detailSize || 'L',
       x: orig.x + 40,
       y: orig.y + 40,
       zIndex: maxZ + 5,
@@ -117,8 +118,8 @@ export function App() {
   };
 
   // Scenario 2: Batch components
-  const handleAutoLayoutComponents = (keys: string[]) => {
-    const newItems = generateCompositionFromComponents(keys, format, detailSize);
+  const handleAutoLayoutComponents = (keys: string[], size?: DetailSize) => {
+    const newItems = generateCompositionFromComponents(keys, format, size || detailSize || 'L');
     setItems(newItems);
     setSelectedItemId(null);
   };

@@ -143,8 +143,9 @@ export const CanvasView: React.FC<CanvasViewProps> = ({
 
             {/* Render composition objects */}
             {sortedItems.map(item => {
-              const assetId = `${item.objectType}-${item.size}-${item.state}`;
-              const asset = assetMap[assetId];
+              const itemSize = item.size || 'L';
+              const assetId = `${item.objectType}-${itemSize}-${item.state}`;
+              const asset = assetMap[assetId] || assetMap[`${item.objectType}-L-${item.state}`] || assetMap[`${item.objectType}-L-main`];
               if (!asset) return null;
 
               const isSelected = selectedItemId === item.id;

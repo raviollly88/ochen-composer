@@ -5,10 +5,12 @@ import {
   PRESET_THEMES,
   AI_SCENARIOS,
 } from './aiComposer';
-import type { CanvasFormat } from './types';
+import type { CanvasFormat, DetailSize } from './types';
+import { OBJECT_CATALOG } from './types';
 import { DEFAULT_PALETTES } from './palettes';
 import { getBackgroundDecorSVG } from './components/BackgroundDecor';
 import { buildStandaloneSVG } from './svgExporter';
+import rawObjects from './data/objects.json';
 
 function assert(condition: boolean, msg: string) {
   if (!condition) {
@@ -26,115 +28,157 @@ console.log('--- Running Studio Ochen AI Composer Test Suite ---');
   console.log('  ✓ 5 visible presets and 20 knowledge-base scenarios verified');
 }
 
-// 2. Test Preset Theme: Journalism & Writing (User Reference Image 3 Layout)
+// 2. Test Preset Theme: Notes & Productivity (Studio Card 2) & Journalism (Scenario 3)
 {
-  console.log('Test 2: Journalism & Writing layout exact alignment');
-  const journalismPreset = PRESET_THEMES.find(p => p.title === 'Журналистика и писательство')!;
-  const res = generateCompositionFromPrompt(journalismPreset.prompt, '1:1', 'L');
-  assert(res.items.length === 3, `Expected 3 items, got ${res.items.length}`);
+  console.log('Test 2: Notes & Productivity layout (Studio Card 2) & Journalism layout');
+  const notesPreset = PRESET_THEMES.find(p => p.title === 'Конспекты и продуктивность')!;
+  const resNotes = generateCompositionFromPrompt(notesPreset.prompt, '1:1', 'L');
+  assert(resNotes.items.length === 3, `Expected 3 items in Notes, got ${resNotes.items.length}`);
   
-  const lamp = res.items.find(i => i.objectType === 'lamp');
-  const notebook = res.items.find(i => i.objectType === 'notebook');
-  const pen = res.items.find(i => i.objectType === 'pen');
-  
-  assert(!!lamp, 'Lamp must be in Journalism scene');
-  assert(!!notebook, 'Notebook must be in Journalism scene');
-  assert(!!pen, 'Pen must be in Journalism scene');
-  
-  // Verify Lamp upper-left anchor
-  assert(lamp!.state === 'bg', 'Lamp should be bg monochrome');
-  assert(lamp!.x >= 250 && lamp!.x <= 300, `Lamp x=${lamp!.x} should be 250..300`);
-  assert(lamp!.y >= 260 && lamp!.y <= 320, `Lamp y=${lamp!.y} should be 260..320`);
-  assert(lamp!.zIndex === 0, `Lamp zIndex should be 0, got ${lamp!.zIndex}`);
+  const notebook = resNotes.items.find(i => i.objectType === 'notebook');
+  const phone = resNotes.items.find(i => i.objectType === 'phone');
+  const pen = resNotes.items.find(i => i.objectType === 'pen');
+  const lamp = resNotes.items.find(i => i.objectType === 'lamp');
 
-  // Verify Notebook lower-right foreground
-  assert(notebook!.state === 'main', 'Notebook should be main');
-  assert(notebook!.x >= 750 && notebook!.x <= 800, `Notebook x=${notebook!.x} should be 750..800`);
-  assert(notebook!.y >= 780 && notebook!.y <= 830, `Notebook y=${notebook!.y} should be 780..830`);
-  assert(notebook!.zIndex > lamp!.zIndex, 'Notebook must be in front of lamp');
+  assert(!!notebook, 'Notebook must be in Notes scene');
+  assert(!!phone, 'Phone must be in Notes scene');
+  assert(!!pen, 'Pen must be in Notes scene');
+  assert(!lamp, 'Lamp must NOT be in Notes scene (lamp monotony broken)');
+  assert(phone!.zIndex > notebook!.zIndex, 'Phone must be placed on top of open notebook page');
+  assert(pen!.zIndex > notebook!.zIndex, 'Pen must be in front on the table');
 
-  // Verify Pen placed along bookmark / lower edge
-  assert(pen!.state === 'main', 'Pen should be main');
-  assert(pen!.x >= 320 && pen!.x <= 360, `Pen x=${pen!.x} should be 320..360`);
-  assert(pen!.y >= 840 && pen!.y <= 880, `Pen y=${pen!.y} should be 840..880`);
-  assert(pen!.zIndex > notebook!.zIndex, 'Pen must be on top of notebook');
+  // Also verify Journalism scenario retains user reference 3 layout
+  const resJournalism = generateCompositionFromPrompt('Журналистика и писательство', '1:1', 'L');
+  assert(resJournalism.items.some(i => i.objectType === 'lamp'), 'Journalism scenario retains desk lamp');
+  assert(resJournalism.items.some(i => i.objectType === 'notebook'), 'Journalism scenario retains notebook');
   
-  console.log('  ✓ Journalism & Writing layout passed with exact user-aligned coordinates');
+  console.log('  ✓ Notes & Productivity passed without lamp; Journalism passed');
 }
 
-// 3. Test Preset Theme: Finance & Budget (Studio Card 5 - No Lamp Base Overlap)
+// 3. Test Preset Theme: Finance & Budget (Studio Card 3: Wallet + Folder + Coin, NO lamp!)
 {
-  console.log('Test 3: Finance & Budget (Studio Card 5 - No Lamp Base Collision)');
+  console.log('Test 3: Finance & Budget (Studio Card 3 - Wallet + Folder + Coin, NO lamp!)');
   const financePreset = PRESET_THEMES.find(p => p.title === 'Личные финансы и бюджет')!;
   const res = generateCompositionFromPrompt(financePreset.prompt, '1:1', 'L');
   assert(res.items.length === 3, `Expected 3 items, got ${res.items.length}`);
   
-  const lamp = res.items.find(i => i.objectType === 'lamp');
+  const folder = res.items.find(i => i.objectType === 'folder');
   const wallet = res.items.find(i => i.objectType === 'wallet');
   const coin = res.items.find(i => i.objectType === 'coin');
+  const lamp = res.items.find(i => i.objectType === 'lamp');
   
-  assert(!!lamp, 'Lamp must be in Finance scene');
+  assert(!!folder, 'Folder must be in Finance scene');
   assert(!!wallet, 'Wallet must be in Finance scene');
   assert(!!coin, 'Coin must be in Finance scene');
+  assert(!lamp, 'Lamp must NOT be in Finance scene (Studio Card 3 has folder backdrop)');
 
-  assert(lamp!.x >= 180 && lamp!.x <= 220, `Lamp x=${lamp!.x} should be 180..220`);
-  assert(wallet!.x >= 400 && wallet!.x <= 450, `Wallet x=${wallet!.x} should be 400..450`);
-  assert(wallet!.y >= 660 && wallet!.y <= 720, `Wallet y=${wallet!.y} should be 660..720`);
-  assert(coin!.x >= 630 && coin!.x <= 690, `Coin x=${coin!.x} should be 630..690`);
-  assert(coin!.y >= 480 && coin!.y <= 540, `Coin y=${coin!.y} should be 480..540`);
-
-  // Verify no overlap: wallet must be placed below lamp base and shadow
-  assert(wallet!.y > lamp!.y + 400, 'Wallet must be placed below lamp base');
-  assert(coin!.x > wallet!.x + 150, 'Coin must be placed to the right of wallet along 30 deg axis');
-  console.log('  ✓ Finance & Budget Card 5 layout passed without lamp base collision');
+  // Verify positions: Folder top-right, Wallet lower-left, Coin lower-right
+  assert(folder!.state === 'bg', 'Folder should be bg monochrome');
+  assert(folder!.x >= 650 && folder!.x <= 750, `Folder x=${folder!.x} should be 650..750`);
+  assert(wallet!.x >= 250 && wallet!.x <= 350, `Wallet x=${wallet!.x} should be 250..350`);
+  assert(coin!.x >= 580 && coin!.x <= 660, `Coin x=${coin!.x} should be 580..660`);
+  assert(wallet!.y > folder!.y, 'Wallet must be in foreground below folder');
+  console.log('  ✓ Finance & Budget Card 3 layout passed with folder backdrop and NO lamp');
 }
 
-// 4. Test Preset Theme: Music & Relaxation (Studio Card 4)
+// 4. Test Preset Theme: Music & Relaxation (Studio Card 4 - Flowers + Headphones, NO lamp!)
 {
   console.log('Test 4: Music & Relaxation (Studio Card 4 - Flowers + Headphones)');
   const musicPreset = PRESET_THEMES.find(p => p.title === 'Музыка и отдых')!;
   const res = generateCompositionFromPrompt(musicPreset.prompt, '1:1', 'L');
   const flowers = res.items.find(i => i.objectType === 'flowers');
   const headphones = res.items.find(i => i.objectType === 'headphones');
+  const lamp = res.items.find(i => i.objectType === 'lamp');
   
   assert(!!flowers, 'Flowers must be in Music scene');
   assert(!!headphones, 'Headphones must be in Music scene');
+  assert(!lamp, 'Lamp must NOT be in Music scene');
   assert(flowers!.state === 'bg', 'Flowers should be bg monochrome');
   assert(headphones!.state === 'main', 'Headphones should be main color');
   assert(headphones!.zIndex > flowers!.zIndex, 'Headphones must be in foreground');
   assert(res.recommendedPalette === 'mint', 'Music preset must recommend mint palette');
-  console.log('  ✓ Music Card 4 layout passed');
+  console.log('  ✓ Music Card 4 layout passed without lamp');
 }
 
-// 5. Test Preset Theme: IT-Startup & Dev (Studio Card 1)
+// 5. Test Preset Theme: IT-Startup & Product (Exact User Reference: media_1794340128223_b966c98c.jpg)
 {
-  console.log('Test 5: IT-Startup & Development (Phone + Puzzle)');
-  const itPreset = PRESET_THEMES.find(p => p.title === 'IT-стартап и разработка')!;
+  console.log('Test 5: IT-Startup & Product (Exact User Reference: Phone lower-left, Puzzle upper-right, Lamp upper-left)');
+  const itPreset = PRESET_THEMES.find(p => p.title === 'IT-стартап и продукт')!;
   const res = generateCompositionFromPrompt(itPreset.prompt, '1:1', 'L');
+  assert(res.items.length === 3, `Expected 3 items in IT-Startup, got ${res.items.length}`);
+
   const phone = res.items.find(i => i.objectType === 'phone');
   const puzzle = res.items.find(i => i.objectType === 'puzzle');
+  const lamp = res.items.find(i => i.objectType === 'lamp');
   
   assert(!!phone, 'Phone must be in IT-Startup scene');
   assert(!!puzzle, 'Puzzle must be in IT-Startup scene');
-  assert(phone!.x < puzzle!.x, 'Phone must be lower-left from puzzle');
-  assert(phone!.y > puzzle!.y, 'Phone must be lower-left from puzzle');
-  console.log('  ✓ IT-Startup Card 1 layout passed');
+  assert(!!lamp, 'Lamp must be in IT-Startup scene');
+
+  // Verify exact user-uploaded screenshot coordinates on 1:1 canvas
+  // Phone: lower-left foreground (x: ~335, y: ~805, scale: ~0.82)
+  assert(phone!.x >= 320 && phone!.x <= 350, `Phone x=${phone!.x} should be ~335`);
+  assert(phone!.y >= 790 && phone!.y <= 820, `Phone y=${phone!.y} should be ~805`);
+  assert(phone!.scale >= 0.80 && phone!.scale <= 0.85, `Phone scale=${phone!.scale} should be ~0.82`);
+  assert(phone!.state === 'main', 'Phone should be main color');
+
+  // Puzzle: upper-right midground (x: ~680..700, y: ~420..450, scale: ~0.85)
+  assert(puzzle!.x >= 670 && puzzle!.x <= 710, `Puzzle x=${puzzle!.x} should be ~690`);
+  assert(puzzle!.y >= 420 && puzzle!.y <= 450, `Puzzle y=${puzzle!.y} should be ~435`);
+  assert(puzzle!.scale >= 0.83 && puzzle!.scale <= 0.88, `Puzzle scale=${puzzle!.scale} should be ~0.85`);
+  assert(puzzle!.state === 'main', 'Puzzle should be main color');
+
+  // Lamp: far upper-left background (x: ~160..180, y: ~160..180, scale: ~0.80)
+  assert(lamp!.x >= 150 && lamp!.x <= 190, `Lamp x=${lamp!.x} should be ~170`);
+  assert(lamp!.y >= 150 && lamp!.y <= 190, `Lamp y=${lamp!.y} should be ~170`);
+  assert(lamp!.scale >= 0.78 && lamp!.scale <= 0.83, `Lamp scale=${lamp!.scale} should be ~0.80`);
+  assert(lamp!.state === 'bg', 'Lamp should be bg monochrome');
+
+  // Depth layering
+  assert(phone!.zIndex > puzzle!.zIndex, 'Phone foreground should be in front of Puzzle midground');
+  assert(puzzle!.zIndex > lamp!.zIndex, 'Puzzle midground should be in front of Lamp background');
+
+  console.log('  ✓ IT-Startup exact user reference layout verified with diagonal balance');
 }
 
-// 6. Test Preset Theme: Workspace & Order (Folder + Pen + Lamp)
+// 6. Test Preset Theme: Workspace & Order (Folder + Notebook + Pen, NO lamp!)
 {
-  console.log('Test 6: Workspace & Order (Folder + Pen + Lamp)');
+  console.log('Test 6: Workspace & Order (Folder + Notebook + Pen, NO lamp!)');
   const workspacePreset = PRESET_THEMES.find(p => p.title === 'Рабочее пространство и порядок')!;
   const res = generateCompositionFromPrompt(workspacePreset.prompt, '1:1', 'L');
   const folder = res.items.find(i => i.objectType === 'folder');
+  const notebook = res.items.find(i => i.objectType === 'notebook');
   const pen = res.items.find(i => i.objectType === 'pen');
   const lamp = res.items.find(i => i.objectType === 'lamp');
   
   assert(!!folder, 'Folder must be in Workspace scene');
+  assert(!!notebook, 'Notebook must be in Workspace scene');
   assert(!!pen, 'Pen must be in Workspace scene');
-  assert(!!lamp, 'Lamp must be in Workspace scene');
-  assert(pen!.x > lamp!.x + 180, 'Pen must be clear of lamp base to avoid collision');
-  console.log('  ✓ Workspace layout passed');
+  assert(!lamp, 'Lamp must NOT be in Workspace scene (lamp monotony broken)');
+
+  // Verify exact editorial layout:
+  // Folder top-right background (monochrome)
+  assert(folder!.state === 'bg', 'Folder should be background monochrome');
+  assert(folder!.x >= 680 && folder!.x <= 760, `Folder x=${folder!.x} should be top-right background (680..760)`);
+  assert(folder!.y >= 330 && folder!.y <= 410, `Folder y=${folder!.y} should be top-right background (330..410)`);
+
+  // Notebook center-left foreground (main color)
+  assert(notebook!.state === 'main', 'Notebook should be main color');
+  assert(notebook!.x >= 330 && notebook!.x <= 410, `Notebook x=${notebook!.x} should be center-left (330..410)`);
+  assert(notebook!.y >= 570 && notebook!.y <= 650, `Notebook y=${notebook!.y} should be center-left (570..650)`);
+
+  // Pen lower-right foreground (main color)
+  assert(pen!.state === 'main', 'Pen should be main color');
+  assert(pen!.x >= 600 && pen!.x <= 680, `Pen x=${pen!.x} should be lower-right foreground (600..680)`);
+  assert(pen!.y >= 730 && pen!.y <= 810, `Pen y=${pen!.y} should be lower-right foreground (730..810)`);
+
+  // Depth layering & negative space
+  assert(pen!.zIndex > notebook!.zIndex, 'Pen must be in front of Notebook');
+  assert(notebook!.zIndex > folder!.zIndex, 'Notebook must be in front of background Folder');
+  const dist = Math.hypot(folder!.x - notebook!.x, folder!.y - notebook!.y);
+  assert(dist > 350, `Folder and Notebook must have breathing room (>350px), got ${dist.toFixed(1)}px`);
+
+  console.log('  ✓ Workspace layout passed without lamp (Folder top-right bg + Notebook center-left + Pen foreground)');
 }
 
 // 7. Verify All 20 Scenarios Generate Valid Compositions & Exact Studio Objects
@@ -144,10 +188,10 @@ console.log('--- Running Studio Ochen AI Composer Test Suite ---');
   // Exact expected items map according to user requirements
   const EXPECTED_SCENARIO_ITEMS: Record<string, string[]> = {
     'music_relaxation': ['headphones', 'flowers'],
-    'personal_finance': ['wallet', 'lamp', 'coin'],
+    'personal_finance': ['wallet', 'folder', 'coin'],
     'journalism_writing': ['notebook', 'lamp', 'pen'],
     'it_startup_dev': ['phone', 'lamp', 'puzzle'],
-    'workspace_order': ['folder', 'lamp', 'pen'],
+    'workspace_order': ['folder', 'notebook', 'pen'],
     'cybersecurity': ['wallet', 'puzzle', 'coin'],
     'education_lectures': ['notebook', 'phone', 'pen'],
     'law_contracts': ['folder', 'notebook', 'pen'],
@@ -155,7 +199,7 @@ console.log('--- Running Studio Ochen AI Composer Test Suite ---');
     'crypto_investments': ['wallet', 'folder', 'coin'],
     'digital_marketing': ['phone', 'folder', 'puzzle'],
     'travel_impressions': ['headphones', 'flowers', 'phone'],
-    'cozy_home': ['notebook', 'lamp', 'flowers'],
+    'cozy_home': ['notebook', 'flowers', 'pen'],
     'logistics_supply': ['folder', 'puzzle', 'coin'],
     'design_creative': ['notebook', 'puzzle', 'pen'],
     'science_research': ['notebook', 'lamp', 'puzzle'],
@@ -457,6 +501,153 @@ console.log('--- Running Studio Ochen AI Composer Test Suite ---');
   assert(!wlRes.some(i => i.objectType === 'coin'), 'Must not inject phantom coin into [wallet, lamp]');
 
   console.log('  ✓ Strict 2-item component selections verified with 0 phantom objects');
+}
+
+// 15. Test Detail Level (L vs S) Integrity & Per-Item Switching
+{
+  console.log('Test 15: Detail Level (L vs S) Asset Integrity & Per-Item Switching');
+
+  const assetDict: Record<string, any> = {};
+  for (const obj of rawObjects as any[]) {
+    assetDict[obj.id] = obj;
+  }
+
+  // 15a. Verify all 10 objects have both L and S versions for main and bg states (40 assets total)
+  const objectKeys = Object.keys(OBJECT_CATALOG);
+  assert(objectKeys.length === 10, `Expected 10 objects in catalog, got ${objectKeys.length}`);
+
+  for (const key of objectKeys) {
+    const lMain = assetDict[`${key}-L-main`];
+    const lBg = assetDict[`${key}-L-bg`];
+    const sMain = assetDict[`${key}-S-main`];
+    const sBg = assetDict[`${key}-S-bg`];
+
+    assert(!!lMain && lMain.paths.length > 0, `Missing or empty asset ${key}-L-main`);
+    assert(!!lBg && lBg.paths.length > 0, `Missing or empty asset ${key}-L-bg`);
+    assert(!!sMain && sMain.paths.length > 0, `Missing or empty asset ${key}-S-main`);
+    assert(!!sBg && sBg.paths.length > 0, `Missing or empty asset ${key}-S-bg`);
+
+    // S should be compact/simplified compared to L
+    assert(sMain.w <= lMain.w, `${key}-S-main width (${sMain.w}) should be <= L width (${lMain.w})`);
+  }
+  console.log('  ✓ All 40 assets (10 objects × 2 detail levels [L/S] × 2 states [main/bg]) verified');
+
+  // 15b. Test generating scene with detailSize='S'
+  const resS = generateCompositionFromPrompt('IT-стартап и продукт', '1:1', 'S');
+  for (const it of resS.items) {
+    assert(it.size === 'S', `Item ${it.objectType} should have size='S', got ${it.size}`);
+    const asset = assetDict[`${it.objectType}-${it.size}-${it.state}`];
+    assert(!!asset, `Asset ${it.objectType}-${it.size}-${it.state} must exist in assetMap`);
+  }
+
+  // 15c. Test per-item detail toggling between L and S
+  const resL = generateCompositionFromPrompt('IT-стартап и продукт', '1:1', 'L');
+  for (const it of resL.items) {
+    assert(it.size === 'L', `Item ${it.objectType} should have size='L', got ${it.size}`);
+    // Simulate toggling to 'S'
+    const toggledAssetId = `${it.objectType}-S-${it.state}`;
+    assert(!!assetDict[toggledAssetId], `Toggling item ${it.objectType} to 'S' must resolve to valid asset ${toggledAssetId}`);
+  }
+
+  // 15d. Verify SVG export with mixed L and S items
+  const mixedItems = [
+    { ...resL.items[0], size: 'S' as DetailSize },
+    { ...resL.items[1], size: 'L' as DetailSize },
+    { ...resL.items[2], size: 'S' as DetailSize }
+  ];
+  const svg = buildStandaloneSVG(mixedItems, '1:1', DEFAULT_PALETTES.mint, assetDict, true);
+  assert(svg.includes('<svg') && svg.includes('</svg>'), 'Mixed L/S SVG export must produce valid SVG');
+  assert(svg.includes(mixedItems[0].objectType), 'SVG must include item 0');
+  assert(svg.includes(mixedItems[1].objectType), 'SVG must include item 1');
+  assert(svg.includes(mixedItems[2].objectType), 'SVG must include item 2');
+
+  console.log('  ✓ Per-item detail level switching (L vs S) and mixed SVG export verified');
+}
+
+// 16. Test Elimination of Lamp Monotony across Visible Presets & Scenarios
+{
+  console.log('Test 16: Elimination of Lamp Monotony across Presets & Scenarios');
+
+  // 16a. Verify the 5 visible presets have diverse backgrounds and NO repetitive lamp
+  const presetResults = PRESET_THEMES.map(p => ({
+    title: p.title,
+    res: generateCompositionFromPrompt(p.prompt, '1:1', 'L')
+  }));
+
+  const presetsWithLamp = presetResults.filter(pr =>
+    pr.res.items.some(i => i.objectType === 'lamp')
+  );
+
+  assert(
+    presetsWithLamp.length === 1,
+    `Lamp must appear in EXACTLY 1 of the 5 visible presets (IT-Startup), but appeared in ${presetsWithLamp.length}: [${presetsWithLamp.map(p => p.title).join(', ')}]`
+  );
+  assert(presetsWithLamp[0].title === 'IT-стартап и продукт', 'Lamp must only appear in IT-Startup preset');
+
+  // Verify specific background items for the other 4 presets:
+  const p1 = presetResults[0]; // Музыка и отдых
+  assert(p1.res.items.some(i => i.objectType === 'flowers'), 'Preset 1 must use Flowers in background');
+  assert(!p1.res.items.some(i => i.objectType === 'lamp'), 'Preset 1 must NOT contain Lamp');
+
+  const p2 = presetResults[1]; // Конспекты и продуктивность
+  assert(p2.res.items.some(i => i.objectType === 'notebook') && p2.res.items.some(i => i.objectType === 'phone'), 'Preset 2 must use Notebook + Phone');
+  assert(!p2.res.items.some(i => i.objectType === 'lamp'), 'Preset 2 must NOT contain Lamp');
+
+  const p3 = presetResults[2]; // Личные финансы и бюджет
+  assert(p3.res.items.some(i => i.objectType === 'folder'), 'Preset 3 must use Folder in background');
+  assert(!p3.res.items.some(i => i.objectType === 'lamp'), 'Preset 3 must NOT contain Lamp');
+
+  const p4 = presetResults[3]; // IT-стартап и продукт
+  assert(p4.res.items.some(i => i.objectType === 'lamp'), 'Preset 4 must use Lamp in top-left background');
+
+  const p5 = presetResults[4]; // Рабочее пространство и порядок
+  assert(p5.res.items.some(i => i.objectType === 'folder') && p5.res.items.some(i => i.objectType === 'notebook'), 'Preset 5 must use Folder + Notebook');
+  assert(!p5.res.items.some(i => i.objectType === 'lamp'), 'Preset 5 must NOT contain Lamp');
+
+  // 16b. Verify across all 20 scenarios that lamp is used conservatively (<= 4 scenarios)
+  const scenariosWithLamp = AI_SCENARIOS.filter(sc =>
+    sc.hero === 'lamp' || sc.bg === 'lamp' || sc.accent === 'lamp'
+  );
+  assert(
+    scenariosWithLamp.length <= 4,
+    `Lamp should be used in at most 4 of the 20 scenarios, but found in ${scenariosWithLamp.length}: [${scenariosWithLamp.map(s => s.id).join(', ')}]`
+  );
+
+  console.log(`  ✓ Lamp monotony eliminated: lamp in exactly 1/5 presets, and only ${scenariosWithLamp.length}/20 scenarios`);
+}
+
+// 17. Test Component Detail Size Independence & Fallback Robustness
+{
+  console.log('Test 17: Component Detail Size Independence & Fallback Robustness');
+
+  // 17a. generateCompositionFromComponents with size 'S'
+  const compsS = generateCompositionFromComponents(['phone', 'puzzle'], '1:1', 'S');
+  assert(compsS.length === 2, `Expected 2 items, got ${compsS.length}`);
+  for (const it of compsS) {
+    assert(it.size === 'S', `Item ${it.objectType} should have size 'S'`);
+  }
+
+  // 17b. generateCompositionFromComponents with size 'L'
+  const compsL = generateCompositionFromComponents(['phone', 'puzzle'], '1:1', 'L');
+  for (const it of compsL) {
+    assert(it.size === 'L', `Item ${it.objectType} should have size 'L'`);
+  }
+
+  // 17c. SVG export robustness when items lack size property
+  const assetDict: Record<string, any> = {};
+  for (const obj of rawObjects as any[]) {
+    assetDict[obj.id] = obj;
+  }
+  const itemsWithoutSize = [
+    { ...compsL[0], size: undefined as any },
+    { ...compsL[1], size: 'S' as DetailSize }
+  ];
+  const exportedSvg = buildStandaloneSVG(itemsWithoutSize, '1:1', DEFAULT_PALETTES.mint, assetDict, false);
+  assert(exportedSvg.includes('<svg') && exportedSvg.includes('</svg>'), 'SVG with undefined item.size must export safely without errors');
+  assert(exportedSvg.includes(compsL[0].objectType), 'Item without explicit size must fallback to L and be present in SVG');
+  assert(exportedSvg.includes(compsL[1].objectType), 'Item with size S must be present in SVG');
+
+  console.log('  ✓ Component detail size independence and fallback robustness verified');
 }
 
 console.log('--- All tests passed with 100% success! ---');
