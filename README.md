@@ -135,25 +135,25 @@ flowchart TD
 
 ### Пример 1. Квадрат 1:1 - "Учеба и конспекты" (Purple Mist)
 - **Идея:** Открытый блокнот в фокусе первого плана, стилус на развороте страниц и монохромная папка документов в правом верхнем фоне. Фирменная фиолетовая палитра студии с диагональными штрихами и мягким эллипсом тени.
-- **Файлы:** [sample-1.svg](public/samples/sample-1.svg) | [Превью PNG](public/samples/sample-1.png)
+- **Файлы:** [sample-study-purple.svg](public/samples/sample-study-purple.svg) | [Превью PNG](public/samples/sample-study-purple.png)
 
-![Пример 1](public/samples/sample-1.png)
+![Пример 1 - Учеба и конспекты](public/samples/sample-study-purple.png)
 
 ---
 
 ### Пример 2. Квадрат 1:1 - "Личные финансы и бюджет" (Warm Peach)
 - **Идея:** Классическая финансовая метафора: папка документов в фоне, детализированный кожаный кошелек на первом плане и золотая монета на столе вдоль 30-градусной изометрической оси. Теплая персиковая палитра с круговым акцентом.
-- **Файлы:** [sample-2.svg](public/samples/sample-2.svg) | [Превью PNG](public/samples/sample-2.png)
+- **Файлы:** [sample-finance-peach.svg](public/samples/sample-finance-peach.svg) | [Превью PNG](public/samples/sample-finance-peach.png)
 
-![Пример 2](public/samples/sample-2.png)
+![Пример 2 - Личные финансы](public/samples/sample-finance-peach.png)
 
 ---
 
 ### Пример 3. Квадрат 1:1 - "Музыка и отдых" (Fresh Mint)
 - **Идея:** Лаконичная сцена отдыха и вдохновения: крупные наушники на первом плане и ваза с тюльпанами в фоновой глубине. Свежая мятная цветовая схема с гармоничным свободным пространством.
-- **Файлы:** [sample-3.svg](public/samples/sample-3.svg) | [Превью PNG](public/samples/sample-3.png)
+- **Файлы:** [sample-music-mint.svg](public/samples/sample-music-mint.svg) | [Превью PNG](public/samples/sample-music-mint.png)
 
-![Пример 3](public/samples/sample-3.png)
+![Пример 3 - Музыка и отдых](public/samples/sample-music-mint.png)
 
 ---
 
