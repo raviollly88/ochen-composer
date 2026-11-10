@@ -392,8 +392,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                   <input
                     type="range"
-                    min="0.12"
-                    max="0.65"
+                    min="0.2"
+                    max="1.5"
                     step="0.01"
                     value={selectedItem.scale}
                     onChange={e =>

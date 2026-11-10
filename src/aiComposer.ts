@@ -31,7 +31,7 @@ export const PRESET_THEMES: PresetTheme[] = [
   },
   {
     title: 'Конспекты и IT-продуктивность',
-    description: 'Открытый блокнот, смартфон на развороте и фоновая лампа',
+    description: 'Открытый блокнот и смартфон на развороте (эталон студии)',
     prompt: 'конспекты учеба продуктивность фокус приложение мобилка',
     palette: 'peach'
   },
@@ -59,17 +59,17 @@ export const PRESET_THEMES: PresetTheme[] = [
  * Natural companion pairings for each primary object when fewer than 3 objects are matched.
  * Strictly adheres to Studio Ochen's reference compositions.
  */
-export const NATURAL_COMPANIONS: Record<string, { bg: string; accent: string }> = {
+export const NATURAL_COMPANIONS: Record<string, { bg: string | null; accent: string | null }> = {
   notebook: { bg: 'lamp', accent: 'pen' },
   wallet: { bg: 'lamp', accent: 'coin' },
-  phone: { bg: 'lamp', accent: 'puzzle' },
-  headphones: { bg: 'flowers', accent: 'puzzle' },
+  phone: { bg: null, accent: 'puzzle' },
+  headphones: { bg: 'flowers', accent: null },
   folder: { bg: 'lamp', accent: 'pen' },
-  lamp: { bg: 'folder', accent: 'pen' },
-  flowers: { bg: 'lamp', accent: 'puzzle' },
+  lamp: { bg: null, accent: 'wallet' },
+  flowers: { bg: null, accent: 'headphones' },
   pen: { bg: 'lamp', accent: 'notebook' },
   coin: { bg: 'lamp', accent: 'wallet' },
-  puzzle: { bg: 'flowers', accent: 'phone' }
+  puzzle: { bg: null, accent: 'phone' }
 };
 
 /**
@@ -257,21 +257,21 @@ export function buildIsometricScene(
     const isHeroNotebook = heroKey === 'notebook';
 
     if (accentKey === 'phone' || (!accentKey && heroKey === 'notebook' && bgKey === 'phone')) {
-      // Studio Card 2: Book bleeding top-left + Phone on right page
+      // Studio Card 2: Book in background/center + Phone on right page
       placed.push({
         type: 'notebook',
         state: isHeroNotebook ? 'main' : 'bg',
-        x: Math.round(cx - 80 * sx),
+        x: Math.round(cx - 100 * sx),
         y: Math.round(cy - 20 * sy),
-        scale: Number((s * 1.03).toFixed(4)),
+        scale: Number((s * 1.02).toFixed(4)),
         rot: 0,
         zIndex: 1
       });
       placed.push({
         type: 'phone',
         state: 'main',
-        x: Math.round(cx + 120 * sx),
-        y: Math.round(cy - 80 * sy),
+        x: Math.round(cx + 100 * sx),
+        y: Math.round(cy - 60 * sy),
         scale: Number((s * 0.85).toFixed(4)),
         rot: 0,
         zIndex: 2
@@ -280,51 +280,59 @@ export function buildIsometricScene(
         placed.push({
           type: 'lamp',
           state: 'bg',
-          x: Math.round(cx - 220 * sx),
-          y: Math.round(cy - 240 * sy),
+          x: Math.round(cx - 230 * sx),
+          y: Math.round(cy - 210 * sy),
           scale: Number((s * 1.03).toFixed(4)),
           rot: 0,
           zIndex: 0
         });
       }
-    } else if (accentKey === 'puzzle' || bgKey === 'notebook') {
+    } else if (accentKey === 'puzzle') {
       // Studio Card 6: Book bleeding top-right + Puzzle on left page + Pen foreground
       placed.push({
         type: 'notebook',
         state: isHeroNotebook ? 'main' : 'bg',
-        x: Math.round(cx + 120 * sx),
-        y: Math.round(cy - 80 * sy),
-        scale: Number((s * 1.03).toFixed(4)),
+        x: Math.round(cx + 160 * sx),
+        y: Math.round(cy - 100 * sy),
+        scale: Number((s * 1.02).toFixed(4)),
         rot: 0,
         zIndex: 1
       });
       placed.push({
         type: 'puzzle',
         state: 'main',
-        x: Math.round(cx - 40 * sx),
-        y: Math.round(cy - 120 * sy),
-        scale: Number((s * 0.91).toFixed(4)),
+        x: Math.round(cx - 20 * sx),
+        y: Math.round(cy - 130 * sy),
+        scale: Number((s * 0.92).toFixed(4)),
         rot: 0,
         zIndex: 2
       });
-      const penOrAccent = accentKey === 'pen' || heroKey === 'pen' ? 'pen' : (accentKey || 'pen');
       placed.push({
-        type: penOrAccent,
+        type: 'pen',
         state: 'main',
-        x: Math.round(cx - 60 * sx),
-        y: Math.round(cy + 200 * sy),
+        x: Math.round(cx - 160 * sx),
+        y: Math.round(cy + 300 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 3
       });
-    } else {
-      // Notebook + Pen in foreground + optional Lamp behind
+    } else if (bgKey === 'lamp') {
+      // User Layout (Image 3): Lamp upper-left + Notebook lower-right foreground + Pen along lower-left edge
+      placed.push({
+        type: 'lamp',
+        state: 'bg',
+        x: Math.round(cx - 230 * sx),
+        y: Math.round(cy - 220 * sy),
+        scale: Number((s * 1.03).toFixed(4)),
+        rot: 0,
+        zIndex: 0
+      });
       placed.push({
         type: 'notebook',
         state: 'main',
-        x: Math.round(cx + 20 * sx),
-        y: Math.round(cy - 20 * sy),
-        scale: Number((s * 1.03).toFixed(4)),
+        x: Math.round(cx + 270 * sx),
+        y: Math.round(cy + 310 * sy),
+        scale: Number((s * 1.02).toFixed(4)),
         rot: 0,
         zIndex: 1
       });
@@ -333,27 +341,38 @@ export function buildIsometricScene(
         type: penAccent,
         state: 'main',
         x: Math.round(cx - 160 * sx),
-        y: Math.round(cy + 220 * sy),
+        y: Math.round(cy + 360 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
-        zIndex: 3
+        zIndex: 2
       });
-      if (bgKey === 'lamp') {
-        placed.push({
-          type: 'lamp',
-          state: 'bg',
-          x: Math.round(cx - 220 * sx),
-          y: Math.round(cy - 240 * sy),
-          scale: Number((s * 1.03).toFixed(4)),
-          rot: 0,
-          zIndex: 0
-        });
-      } else if (bgKey === 'flowers') {
+    } else {
+      // Notebook + Pen in foreground + optional Flower/other bg
+      placed.push({
+        type: 'notebook',
+        state: 'main',
+        x: Math.round(cx + 270 * sx),
+        y: Math.round(cy + 310 * sy),
+        scale: Number((s * 1.02).toFixed(4)),
+        rot: 0,
+        zIndex: 1
+      });
+      const penAccent = accentKey || 'pen';
+      placed.push({
+        type: penAccent,
+        state: 'main',
+        x: Math.round(cx - 160 * sx),
+        y: Math.round(cy + 360 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 2
+      });
+      if (bgKey === 'flowers') {
         placed.push({
           type: 'flowers',
           state: 'bg',
           x: Math.round(cx - 240 * sx),
-          y: Math.round(cy - 220 * sy),
+          y: Math.round(cy - 200 * sy),
           scale: Number(s.toFixed(4)),
           rot: 0,
           zIndex: 0
@@ -364,21 +383,21 @@ export function buildIsometricScene(
   // ARCHETYPE 2: Wallet
   } else if (heroKey === 'wallet') {
     if (bgKey === 'folder') {
-      // Studio Card 3: Folder bleeding top-right + Wallet + Coin
+      // Studio Card 3: Folder bleeding top-right + Wallet foreground-left + Coin foreground-right
       placed.push({
         type: 'folder',
         state: 'main',
-        x: Math.round(cx + 180 * sx),
+        x: Math.round(cx + 200 * sx),
         y: Math.round(cy - 120 * sy),
-        scale: Number((s * 0.95).toFixed(4)),
+        scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 1
       });
       placed.push({
         type: 'wallet',
         state: 'main',
-        x: Math.round(cx - 140 * sx),
-        y: Math.round(cy + 140 * sy),
+        x: Math.round(cx - 200 * sx),
+        y: Math.round(cy + 180 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 2
@@ -386,27 +405,46 @@ export function buildIsometricScene(
       placed.push({
         type: accentKey || 'coin',
         state: 'main',
-        x: Math.round(cx + 100 * sx),
-        y: Math.round(cy + 160 * sy),
+        x: Math.round(cx + 120 * sx),
+        y: Math.round(cy + 240 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 3
       });
     } else if (bgKey === 'lamp') {
-      // Studio Card 5: Lamp bleeding top + Wallet + Coin
+      // Studio Card 5: Lamp upper-left + Wallet lower-center + Coin right (no overlap on lamp base!)
       placed.push({
         type: 'lamp',
         state: 'bg',
-        x: Math.round(cx - 120 * sx),
-        y: Math.round(cy - 180 * sy),
+        x: Math.round(cx - 300 * sx),
+        y: Math.round(cy - 320 * sy),
         scale: Number((s * 1.03).toFixed(4)),
         rot: 0,
-        zIndex: 1
+        zIndex: 0
       });
       placed.push({
         type: 'wallet',
         state: 'main',
-        x: Math.round(cx + 40 * sx),
+        x: Math.round(cx - 80 * sx),
+        y: Math.round(cy + 190 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 2
+      });
+      placed.push({
+        type: accentKey || 'coin',
+        state: 'main',
+        x: Math.round(cx + 160 * sx),
+        y: Math.round(cy + 10 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 3
+      });
+    } else {
+      placed.push({
+        type: 'wallet',
+        state: 'main',
+        x: Math.round(cx - 60 * sx),
         y: Math.round(cy + 180 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
@@ -416,26 +454,7 @@ export function buildIsometricScene(
         type: accentKey || 'coin',
         state: 'main',
         x: Math.round(cx + 180 * sx),
-        y: Math.round(cy + 50 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 3
-      });
-    } else {
-      placed.push({
-        type: 'wallet',
-        state: 'main',
-        x: Math.round(cx - 40 * sx),
         y: Math.round(cy + 120 * sy),
-        scale: Number(s.toFixed(4)),
-        rot: 0,
-        zIndex: 2
-      });
-      placed.push({
-        type: accentKey || 'coin',
-        state: 'main',
-        x: Math.round(cx + 160 * sx),
-        y: Math.round(cy - 10 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 3
@@ -444,8 +463,8 @@ export function buildIsometricScene(
         placed.push({
           type: bgKey,
           state: 'bg',
-          x: Math.round(cx - 160 * sx),
-          y: Math.round(cy - 180 * sy),
+          x: Math.round(cx - 230 * sx),
+          y: Math.round(cy - 200 * sy),
           scale: Number(s.toFixed(4)),
           rot: 0,
           zIndex: 1
@@ -471,7 +490,7 @@ export function buildIsometricScene(
         state: 'main',
         x: Math.round(cx + 40 * sx),
         y: Math.round(cy + 140 * sy),
-        scale: Number((s * 1.07).toFixed(4)),
+        scale: Number((s * 1.08).toFixed(4)),
         rot: 0,
         zIndex: 2
       });
@@ -479,9 +498,9 @@ export function buildIsometricScene(
         placed.push({
           type: 'puzzle',
           state: 'main',
-          x: Math.round(cx - 40 * sx),
-          y: Math.round(cy + 180 * sy),
-          scale: Number((s * 0.9).toFixed(4)),
+          x: Math.round(cx - 80 * sx),
+          y: Math.round(cy + 280 * sy),
+          scale: Number((s * 0.85).toFixed(4)),
           rot: 0,
           zIndex: 3
         });
@@ -490,18 +509,18 @@ export function buildIsometricScene(
       placed.push({
         type: 'lamp',
         state: 'bg',
-        x: Math.round(cx - 160 * sx),
-        y: Math.round(cy - 180 * sy),
+        x: Math.round(cx - 230 * sx),
+        y: Math.round(cy - 220 * sy),
         scale: Number((s * 1.03).toFixed(4)),
         rot: 0,
-        zIndex: 1
+        zIndex: 0
       });
       placed.push({
         type: 'headphones',
         state: 'main',
-        x: Math.round(cx + 80 * sx),
+        x: Math.round(cx + 60 * sx),
         y: Math.round(cy + 140 * sy),
-        scale: Number((s * 1.07).toFixed(4)),
+        scale: Number((s * 1.08).toFixed(4)),
         rot: 0,
         zIndex: 2
       });
@@ -510,8 +529,8 @@ export function buildIsometricScene(
           type: accentKey,
           state: 'main',
           x: Math.round(cx - 40 * sx),
-          y: Math.round(cy + 180 * sy),
-          scale: Number((s * 0.9).toFixed(4)),
+          y: Math.round(cy + 240 * sy),
+          scale: Number((s * 0.85).toFixed(4)),
           rot: 0,
           zIndex: 3
         });
@@ -520,9 +539,9 @@ export function buildIsometricScene(
       placed.push({
         type: 'headphones',
         state: 'main',
-        x: Math.round(cx),
-        y: Math.round(cy + 80 * sy),
-        scale: Number((s * 1.07).toFixed(4)),
+        x: Math.round(cx + 20 * sx),
+        y: Math.round(cy + 140 * sy),
+        scale: Number((s * 1.08).toFixed(4)),
         rot: 0,
         zIndex: 2
       });
@@ -530,7 +549,7 @@ export function buildIsometricScene(
         placed.push({
           type: bgKey,
           state: 'bg',
-          x: Math.round(cx - 180 * sx),
+          x: Math.round(cx - 220 * sx),
           y: Math.round(cy - 180 * sy),
           scale: Number(s.toFixed(4)),
           rot: 0,
@@ -546,7 +565,7 @@ export function buildIsometricScene(
       placed.push({
         type: 'phone',
         state: 'main',
-        x: Math.round(cx - 100 * sx),
+        x: Math.round(cx - 120 * sx),
         y: Math.round(cy + 120 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
@@ -565,7 +584,7 @@ export function buildIsometricScene(
         placed.push({
           type: 'lamp',
           state: 'bg',
-          x: Math.round(cx - 220 * sx),
+          x: Math.round(cx - 230 * sx),
           y: Math.round(cy - 220 * sy),
           scale: Number((s * 1.03).toFixed(4)),
           rot: 0,
@@ -575,7 +594,7 @@ export function buildIsometricScene(
         placed.push({
           type: 'flowers',
           state: 'bg',
-          x: Math.round(cx - 220 * sx),
+          x: Math.round(cx - 240 * sx),
           y: Math.round(cy - 200 * sy),
           scale: Number(s.toFixed(4)),
           rot: 0,
@@ -586,8 +605,8 @@ export function buildIsometricScene(
       placed.push({
         type: 'phone',
         state: 'main',
-        x: Math.round(cx - 80 * sx),
-        y: Math.round(cy + 100 * sy),
+        x: Math.round(cx - 120 * sx),
+        y: Math.round(cy + 120 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 2
@@ -607,7 +626,7 @@ export function buildIsometricScene(
         placed.push({
           type: bgKey,
           state: 'bg',
-          x: Math.round(cx - 200 * sx),
+          x: Math.round(cx - 220 * sx),
           y: Math.round(cy - 200 * sy),
           scale: Number(s.toFixed(4)),
           rot: 0,
@@ -621,9 +640,9 @@ export function buildIsometricScene(
     placed.push({
       type: 'folder',
       state: 'main',
-      x: Math.round(cx + 160 * sx),
-      y: Math.round(cy - 80 * sy),
-      scale: Number((s * 0.98).toFixed(4)),
+      x: Math.round(cx + 240 * sx),
+      y: Math.round(cy - 140 * sy),
+      scale: Number((s * 1.02).toFixed(4)),
       rot: 0,
       zIndex: 1
     });
@@ -631,18 +650,18 @@ export function buildIsometricScene(
       placed.push({
         type: 'pen',
         state: 'main',
-        x: Math.round(cx - 160 * sx),
-        y: Math.round(cy + 180 * sy),
+        x: Math.round(cx),
+        y: Math.round(cy + 280 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
-        zIndex: 3
+        zIndex: 2
       });
     } else if (accentKey === 'coin') {
       placed.push({
         type: 'coin',
         state: 'main',
-        x: Math.round(cx - 120 * sx),
-        y: Math.round(cy + 160 * sy),
+        x: Math.round(cx + 120 * sx),
+        y: Math.round(cy + 240 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 3
@@ -651,19 +670,28 @@ export function buildIsometricScene(
       placed.push({
         type: 'wallet',
         state: 'main',
-        x: Math.round(cx - 140 * sx),
-        y: Math.round(cy + 140 * sy),
+        x: Math.round(cx - 200 * sx),
+        y: Math.round(cy + 180 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 2
+      });
+      placed.push({
+        type: 'coin',
+        state: 'main',
+        x: Math.round(cx + 120 * sx),
+        y: Math.round(cy + 240 * sy),
+        scale: Number(s.toFixed(4)),
+        rot: 0,
+        zIndex: 3
       });
     }
     if (bgKey === 'lamp') {
       placed.push({
         type: 'lamp',
         state: 'bg',
-        x: Math.round(cx - 200 * sx),
-        y: Math.round(cy - 220 * sy),
+        x: Math.round(cx - 240 * sx),
+        y: Math.round(cy - 230 * sy),
         scale: Number((s * 1.03).toFixed(4)),
         rot: 0,
         zIndex: 0
@@ -675,8 +703,8 @@ export function buildIsometricScene(
     placed.push({
       type: 'lamp',
       state: 'main',
-      x: Math.round(cx - 80 * sx),
-      y: Math.round(cy - 40 * sy),
+      x: Math.round(cx - 140 * sx),
+      y: Math.round(cy - 80 * sy),
       scale: Number(s.toFixed(4)),
       rot: 0,
       zIndex: 1
@@ -685,8 +713,8 @@ export function buildIsometricScene(
     placed.push({
       type: lampAccent,
       state: 'main',
-      x: Math.round(cx + 140 * sx),
-      y: Math.round(cy + 180 * sy),
+      x: Math.round(cx + 200 * sx),
+      y: Math.round(cy + 280 * sy),
       scale: Number(s.toFixed(4)),
       rot: 0,
       zIndex: 2
@@ -695,7 +723,7 @@ export function buildIsometricScene(
       placed.push({
         type: bgKey,
         state: 'bg',
-        x: Math.round(cx + 160 * sx),
+        x: Math.round(cx + 220 * sx),
         y: Math.round(cy - 120 * sy),
         scale: Number((s * 0.9).toFixed(4)),
         rot: 0,
@@ -708,8 +736,8 @@ export function buildIsometricScene(
     placed.push({
       type: heroKey,
       state: 'main',
-      x: Math.round(cx),
-      y: Math.round(cy + 80 * sy),
+      x: Math.round(cx + 40 * sx),
+      y: Math.round(cy + 160 * sy),
       scale: Number(s.toFixed(4)),
       rot: 0,
       zIndex: 2
@@ -718,8 +746,8 @@ export function buildIsometricScene(
       placed.push({
         type: bgKey,
         state: 'bg',
-        x: Math.round(cx - 180 * sx),
-        y: Math.round(cy - 180 * sy),
+        x: Math.round(cx - 220 * sx),
+        y: Math.round(cy - 200 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 1
@@ -729,8 +757,8 @@ export function buildIsometricScene(
       placed.push({
         type: accentKey,
         state: 'main',
-        x: Math.round(cx + 160 * sx),
-        y: Math.round(cy + 140 * sy),
+        x: Math.round(cx + 220 * sx),
+        y: Math.round(cy - 40 * sy),
         scale: Number(s.toFixed(4)),
         rot: 0,
         zIndex: 3
@@ -839,23 +867,28 @@ export function generateCompositionFromPrompt(
       accentKey = 'phone';
     }
 
-    // GUARANTEE: Always 2 to 3 objects via natural companion pairings!
+    // GUARANTEE: 2 to 3 objects via natural companion pairings!
     if (!bgKey && !accentKey) {
       const companions = NATURAL_COMPANIONS[heroKey] || { bg: 'lamp', accent: 'pen' };
       bgKey = companions.bg;
       accentKey = companions.accent;
     } else if (!bgKey) {
-      const companions = NATURAL_COMPANIONS[heroKey] || { bg: 'lamp', accent: 'pen' };
-      bgKey = companions.bg;
+      // Add background if appropriate for the hero object
+      if (heroKey === 'wallet' || heroKey === 'folder' || (heroKey === 'notebook' && accentKey !== 'phone')) {
+        const companions = NATURAL_COMPANIONS[heroKey];
+        if (companions && companions.bg) {
+          bgKey = companions.bg;
+        }
+      }
     }
   } else {
     // Unknown or abstract prompt: categorize intelligently
     const hash = hashString(pLower || 'default');
     const defaultPresets = [
-      { hero: 'notebook', bg: 'lamp', accent: 'pen' },    // Writing & desk (Universal fallback!)
-      { hero: 'wallet', bg: 'lamp', accent: 'coin' },      // Finance & commerce
-      { hero: 'phone', bg: 'lamp', accent: 'puzzle' },     // Tech & digital
-      { hero: 'headphones', bg: 'flowers', accent: 'puzzle' } // Creative & audio
+      { hero: 'notebook', bg: 'lamp', accent: 'pen' },        // Writing & desk (Universal fallback!)
+      { hero: 'wallet', bg: 'lamp', accent: 'coin' },          // Finance & commerce
+      { hero: 'phone', bg: null, accent: 'puzzle' },           // Tech & digital
+      { hero: 'headphones', bg: 'flowers', accent: null }      // Creative & audio
     ];
     const picked = defaultPresets[hash % defaultPresets.length];
     heroKey = picked.hero;
