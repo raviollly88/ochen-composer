@@ -9,10 +9,10 @@
 ## Демонстрация и ссылки
 
 - **Демо сервиса (Vercel):** [https://ochen-composer.vercel.app](https://ochen-composer.vercel.app) *(деплой в 1 клик через Vercel / Netlify)*
-- **Репозиторий GitHub:** [https://github.com/roman-dev/ochen-composer](https://github.com/roman-dev/ochen-composer)
+- **Репозиторий GitHub:** [https://github.com/raviollly88/ochen-composer](https://github.com/raviollly88/ochen-composer)
 - **Локальный запуск:**
   ```bash
-  git clone https://github.com/roman-dev/ochen-composer.git
+  git clone https://github.com/raviollly88/ochen-composer.git
   cd ochen-composer
   npm install
   npm run dev
